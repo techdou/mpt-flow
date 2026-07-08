@@ -1,9 +1,8 @@
 import { create } from "zustand";
 import { useCanvasStore } from "./canvasStore";
 import { collectUpstreamParams } from "../workflow/engine";
-import { runStage, getTaskState } from "../api/stage";
+import { runStage } from "../api/stage";
 import type { FlowNodeData, StageId } from "../workflow/types";
-import type { Node } from "@xyflow/react";
 
 /**
  * 任务运行状态管理。
@@ -12,16 +11,18 @@ import type { Node } from "@xyflow/react";
  *   - runNode: 触发某个节点的单阶段执行
  *   - 收集上游产物 → 组装请求体 → 调 API → 更新节点状态/产物
  *   - 维护一个共享的 taskId（同一画布上所有节点共用，跨阶段复用 manifest）
- *   - 长耗时阶段（audio/materials/render）运行时轮询后端进度，更新节点显示
+ *   - 运行时显示已用时间计时器
  *
- * 进度轮询原理：
- *   runStage 是阻塞 await 的。对长耗时阶段，在 await 期间并行起一个
- *   setInterval 轮询 GET /tasks/{taskId} 的 progress 字段，更新到
- *   node.data.progress。API 返回后清除 interval。
+ * 关于"运行进度"的设计说明（诚实原则）：
+ *   后端 /stage/* 端点是阻塞式的——要等整个阶段跑完才返回。
+ *   没有 SSE / WebSocket 推送中间进度，所以"运行中实时进度百分比"在
+ *   当前架构下无法真实获取。之前用 setInterval 轮询 GET /tasks/{id}
+ *   有两个致命问题：(1) 首次运行时 sharedTaskId 还没拿到，轮询的是 null；
+ *   (2) 就算拿到了，后端 POST /stage 要等跑完才返回，轮询到的 task 在
+ *   阶段结束前可能根本不存在于 state 里（stage 端点先跑完才 update_task）。
+ *   所以这里去掉假进度轮询，只保留真实的耗时计时器。进度条用
+ *   indeterminate 动画表示"运行中但不显示假百分比"。
  */
-
-/** 需要进度轮询的长耗时阶段（这些走 tm.start，后端会更新 progress） */
-const PROGRESS_STAGES: StageId[] = ["audio", "subtitle", "materials", "render"];
 
 interface TaskState {
   /** 当前工作流的共享 task_id，首次运行某节点时由后端生成 */
@@ -58,27 +59,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       elapsedSeconds: 0,
     });
 
-    // 耗时计时器（所有阶段都显示已用时间）
+    // 耗时计时器（同步回调，无竞态风险，finally 里 clearInterval 即可）
     const startTime = Date.now();
     const elapsedTimer = setInterval(() => {
       updateNodeData(nodeId, { elapsedSeconds: Math.floor((Date.now() - startTime) / 1000) });
     }, 1000);
-
-    // 进度轮询器（仅长耗时阶段）
-    let progressTimer: ReturnType<typeof setInterval> | null = null;
-    const sharedTaskId = get().sharedTaskId;
-    if (PROGRESS_STAGES.includes(stageId) && sharedTaskId) {
-      progressTimer = setInterval(async () => {
-        try {
-          const taskState = await getTaskState(sharedTaskId);
-          if (typeof taskState.progress === "number") {
-            updateNodeData(nodeId, { progress: taskState.progress });
-          }
-        } catch {
-          // 轮询失败静默忽略，不打断主流程
-        }
-      }, 3000);
-    }
 
     try {
       // 收集上游产物
@@ -96,11 +81,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       };
 
       // 带上共享 taskId（跨阶段复用后端 manifest）
+      const sharedTaskId = get().sharedTaskId;
       if (sharedTaskId) {
         payload.task_id = sharedTaskId;
       }
 
-      // 调 API
+      // 调 API（阻塞，等阶段跑完才返回）
       const result = await runStage(stageId, payload);
 
       // 记录 task_id（首次运行后固定下来）
@@ -120,7 +106,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       updateNodeData(nodeId, { status: "error", error: message });
     } finally {
       clearInterval(elapsedTimer);
-      if (progressTimer) clearInterval(progressTimer);
       set({ isRunning: false });
     }
   },

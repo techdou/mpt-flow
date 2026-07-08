@@ -28,15 +28,19 @@ export function Sidebar() {
   };
 
   // 键盘添加：在画布中心附近放节点，用已有节点数做偏移避免重叠。
+  // 位置不精确没关系——FlowCanvas 会 watch lastAddedNodeId 并 fitView 让它可见。
   const onKeyDown = (e: KeyboardEvent, stageId: StageId) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     const count = useCanvasStore.getState().nodes.length;
     addStageNode(stageId, {
-      x: 200 + (count % 5) * 50,
-      y: 150 + Math.floor(count / 5) * 80,
+      x: (count % 5) * 60,
+      y: Math.floor(count / 5) * 80,
     });
   };
+
+  // 短名称 helper（和显示用的一致，aria-label 也用它，保持一致）
+  const shortName = (s: string) => s.split("，")[0].split("。")[0];
 
   return (
     <div className="flex w-56 flex-col border-r border-mpt-border bg-mpt-dark">
@@ -56,14 +60,14 @@ export function Sidebar() {
             onKeyDown={(e) => onKeyDown(e, stageId)}
             tabIndex={0}
             role="button"
-            aria-label={`添加${STAGE_HINTS[stageId].what.split("，")[0]}节点`}
+            aria-label={`添加${shortName(STAGE_HINTS[stageId].what)}节点`}
             className="cursor-grab rounded-lg border border-mpt-border bg-mpt-panel p-3 transition-colors hover:border-mpt-teal focus:border-mpt-teal focus:outline-none focus:ring-1 focus:ring-mpt-teal active:cursor-grabbing"
           >
             <div className="flex items-center gap-2">
               <span className="text-lg">{STAGE_ICONS[stageId]}</span>
               <div>
                 <div className="text-sm font-medium text-white">
-                  {STAGE_HINTS[stageId].what.split("，")[0].split("。")[0]}
+                  {shortName(STAGE_HINTS[stageId].what)}
                 </div>
                 <div className="font-mono text-xs text-mpt-muted">{stageId}</div>
               </div>

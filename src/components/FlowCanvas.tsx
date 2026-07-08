@@ -1,4 +1,4 @@
-import { useCallback, type DragEvent } from "react";
+import { useCallback, useEffect, useRef, type DragEvent } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -37,8 +37,20 @@ function CanvasInner() {
     onConnect,
     setSelectedNode,
     addStageNode,
+    lastAddedNodeId,
   } = useCanvasStore();
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
+
+  // 键盘添加节点后（lastAddedNodeId 变化），fitView 让新节点可见。
+  // 拖拽添加不需要这个（落点已经是视口内位置）。用 ref 记录上次处理过的 id 避免重复 fit。
+  const lastHandledNodeId = useRef<string | null>(null);
+  useEffect(() => {
+    if (lastAddedNodeId && lastAddedNodeId !== lastHandledNodeId.current) {
+      lastHandledNodeId.current = lastAddedNodeId;
+      // 短延迟等 React Flow 完成节点测量后再 fit
+      setTimeout(() => fitView({ nodes: [{ id: lastAddedNodeId }], duration: 300, maxZoom: 1.2 }), 50);
+    }
+  }, [lastAddedNodeId, fitView]);
 
   // 拖入新节点
   const onDrop = useCallback(

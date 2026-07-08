@@ -28,6 +28,8 @@ interface CanvasState {
   nodes: Node<FlowNodeData>[];
   edges: Edge[];
   selectedNodeId: string | null;
+  /** 最近添加的节点 id（FlowCanvas watch 它触发 fitView，让键盘添加的节点可见） */
+  lastAddedNodeId: string | null;
 
   setNodes: (nodes: Node<FlowNodeData>[]) => void;
   setEdges: (edges: Edge[]) => void;
@@ -59,6 +61,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNodeId: null,
+  lastAddedNodeId: null,
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -93,7 +96,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         params: {},
       },
     };
-    set({ nodes: [...get().nodes, newNode] });
+    set({ nodes: [...get().nodes, newNode], lastAddedNodeId: id });
     return id;
   },
 
@@ -107,7 +110,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   deleteEdge: (id) => set({ edges: get().edges.filter((e) => e.id !== id) }),
 
-  loadTemplate: (nodes, edges) => set({ nodes, edges, selectedNodeId: null }),
+  loadTemplate: (nodes, edges) => set({ nodes, edges, selectedNodeId: null, lastAddedNodeId: null }),
 
-  clearCanvas: () => set({ nodes: [], edges: [], selectedNodeId: null }),
+  clearCanvas: () => set({ nodes: [], edges: [], selectedNodeId: null, lastAddedNodeId: null }),
 }));

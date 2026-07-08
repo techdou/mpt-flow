@@ -61,10 +61,13 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
     }
     if (Array.isArray(val)) {
       if (val.length === 0) return "[]";
-      // 数组显示前 2 项内容 + 省略
-      const preview = val.slice(0, 2).map((v) =>
-        typeof v === "string" ? `"${v.length > 20 ? v.slice(0, 20) + "…" : v}"` : String(v)
-      ).join(", ");
+      // 数组显示前 2 项内容 + 省略。对象项用 JSON 截断，避免 [object Object]
+      const preview = val.slice(0, 2).map((v) => {
+        if (typeof v === "string") {
+          return `"${v.length > 20 ? v.slice(0, 20) + "…" : v}"`;
+        }
+        return JSON.stringify(v).slice(0, 20);
+      }).join(", ");
       return `[${preview}${val.length > 2 ? `, …共${val.length}项` : ""}]`;
     }
     if (typeof val === "object") {
@@ -122,14 +125,11 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
         </button>
       </div>
 
-      {/* 状态行：显示进度百分比 + 已用时间 */}
+      {/* 状态行：运行中显示已用时间 */}
       <div className="px-3 pb-1">
         {status === "running" ? (
           <span className="font-mono text-xs text-mpt-muted">
             {style.label}
-            {typeof nodeData.progress === "number" && nodeData.progress > 0
-              ? ` · ${nodeData.progress}%`
-              : ""}
             {typeof nodeData.elapsedSeconds === "number"
               ? ` · ${nodeData.elapsedSeconds}s`
               : ""}
@@ -139,13 +139,10 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
         )}
       </div>
 
-      {/* 运行进度条（running 且有进度时显示） */}
-      {status === "running" && typeof nodeData.progress === "number" && nodeData.progress > 0 && (
+      {/* 运行中 indeterminate 进度条（不显示假百分比，后端无实时进度推送） */}
+      {status === "running" && (
         <div className="mx-3 mb-1 h-1 overflow-hidden rounded bg-mpt-border">
-          <div
-            className="h-full bg-mpt-gold transition-all duration-500"
-            style={{ width: `${nodeData.progress}%` }}
-          />
+          <div className="h-full w-1/3 animate-pulse rounded bg-mpt-gold" />
         </div>
       )}
 
