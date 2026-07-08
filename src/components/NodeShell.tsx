@@ -51,12 +51,26 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
 
   const handleClick = () => setSelectedNode(id);
 
-  // 产物预览（只显示前 60 字）
+  // 产物预览：根据类型智能截断
   const outputEntries = Object.entries(nodeData.outputs || {});
   const previewOutput = (val: unknown): string => {
-    if (typeof val === "string") return val.length > 60 ? val.slice(0, 60) + "..." : val;
-    if (Array.isArray(val)) return `[${val.length} 项]`;
-    return JSON.stringify(val).slice(0, 60);
+    if (val == null) return "";
+    if (typeof val === "string") {
+      return val.length > 60 ? val.slice(0, 60) + "..." : val;
+    }
+    if (Array.isArray(val)) {
+      if (val.length === 0) return "[]";
+      // 数组显示前 2 项内容 + 省略
+      const preview = val.slice(0, 2).map((v) =>
+        typeof v === "string" ? `"${v.length > 20 ? v.slice(0, 20) + "…" : v}"` : String(v)
+      ).join(", ");
+      return `[${preview}${val.length > 2 ? `, …共${val.length}项` : ""}]`;
+    }
+    if (typeof val === "object") {
+      const keys = Object.keys(val as object);
+      return keys.length > 4 ? `{${keys.slice(0, 4).join(", ")}, …}` : `{${keys.join(", ")}}`;
+    }
+    return String(val).slice(0, 60);
   };
 
   return (
@@ -89,14 +103,36 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
           disabled={status === "running" || isRunning}
           className="ml-auto rounded bg-mpt-teal px-2 py-0.5 text-xs font-medium text-white hover:bg-mpt-teal/80 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {status === "running" ? "..." : "运行"}
+          {status === "running" ? "运行中" : status === "error" ? "重试" : "运行"}
         </button>
       </div>
 
-      {/* 状态行 */}
+      {/* 状态行：显示进度百分比 + 已用时间 */}
       <div className="px-3 pb-1">
-        <span className="font-mono text-xs text-mpt-muted">{style.label}</span>
+        {status === "running" ? (
+          <span className="font-mono text-xs text-mpt-muted">
+            {style.label}
+            {typeof nodeData.progress === "number" && nodeData.progress > 0
+              ? ` · ${nodeData.progress}%`
+              : ""}
+            {typeof nodeData.elapsedSeconds === "number"
+              ? ` · ${nodeData.elapsedSeconds}s`
+              : ""}
+          </span>
+        ) : (
+          <span className="font-mono text-xs text-mpt-muted">{style.label}</span>
+        )}
       </div>
+
+      {/* 运行进度条（running 且有进度时显示） */}
+      {status === "running" && typeof nodeData.progress === "number" && nodeData.progress > 0 && (
+        <div className="mx-3 mb-1 h-1 overflow-hidden rounded bg-mpt-border">
+          <div
+            className="h-full bg-mpt-gold transition-all duration-500"
+            style={{ width: `${nodeData.progress}%` }}
+          />
+        </div>
+      )}
 
       {/* 产物预览 */}
       {outputEntries.length > 0 && (
@@ -114,10 +150,11 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
         </div>
       )}
 
-      {/* 错误信息 */}
+      {/* 错误信息（含重试提示） */}
       {status === "error" && nodeData.error && (
         <div className="border-t border-mpt-red/30 bg-mpt-red/10 px-3 py-1.5">
           <p className="text-xs text-mpt-red break-all">{nodeData.error}</p>
+          <p className="mt-0.5 text-xs text-mpt-muted">点"重试"按钮重新运行</p>
         </div>
       )}
 

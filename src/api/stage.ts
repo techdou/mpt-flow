@@ -16,6 +16,13 @@ export interface StageResult {
   error?: string;
 }
 
+/** 任务状态查询结果（GET /tasks/{id}） */
+export interface TaskState {
+  state: number; // -1=FAILED, 1=COMPLETE, 4=PROCESSING
+  progress: number; // 0-100
+  [key: string]: unknown;
+}
+
 /**
  * 触发某个阶段。
  *
@@ -38,6 +45,15 @@ export async function runStage(
     throw new Error((data as { error: string }).error);
   }
   return data as StageResult;
+}
+
+/**
+ * 查询任务状态（进度百分比 + 状态）。
+ * 用于 render 等长耗时阶段运行时轮询进度。
+ */
+export async function getTaskState(taskId: string): Promise<TaskState> {
+  const resp = await client.get<ApiResponse<TaskState>>(`/api/v1/tasks/${taskId}`);
+  return resp.data.data;
 }
 
 /** 拉取所有阶段的元数据（供节点悬停说明用） */

@@ -49,4 +49,8 @@ export interface FlowNodeData extends Record<string, unknown> {
   error?: string;
   /** 运行时关联的后端 task_id（跨阶段复用用） */
   taskId?: string;
+  /** 运行进度 0-100（长耗时阶段轮询后端得到，running 时有值） */
+  progress?: number;
+  /** 已运行秒数（running 时有值，由前端计时器更新） */
+  elapsedSeconds?: number;
 }
