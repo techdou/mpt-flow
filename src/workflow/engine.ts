@@ -1,5 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
-import type { FlowNodeData, StageId } from "./types";
+import type { FlowNodeData } from "./types";
 
 /**
  * 工作流引擎：拓扑排序 + 上游产物收集。
@@ -72,7 +72,11 @@ export function collectUpstreamParams(
 /**
  * 校验连线是否合法。
  * 规则：不能成环（A→B→A），不能自连。
- * 这里只做基础校验，具体"输出能否喂给输入"由用户自己判断。
+ *
+ * 成环检测：新连线 source→target 后，如果从 target 出发能沿正方向
+ * （source→target 方向）回到 source，就成环了。
+ * 所以从 target 开始 BFS 往下游走（取 e.source === current 的 target），
+ * 碰到 source 就拒绝。
  */
 export function isValidConnection(
   connection: { source: string; target: string },
@@ -80,29 +84,20 @@ export function isValidConnection(
 ): boolean {
   if (connection.source === connection.target) return false;
 
-  // 检查是否成环：从 target 回溯，如果能走到 source 就成环了
   const visited = new Set<string>();
   const queue = [connection.target];
   while (queue.length > 0) {
     const current = queue.shift()!;
-    if (current === connection.source) return false;
+    if (current === connection.source) return false; // target 能到 source → 成环
     if (visited.has(current)) continue;
     visited.add(current);
 
-    const upstreams = edges
-      .filter((e) => e.target === current)
-      .map((e) => e.source);
-    queue.push(...upstreams);
+    // 沿下游方向走：current 作为 source 的边的 target
+    const downstreams = edges
+      .filter((e) => e.source === current)
+      .map((e) => e.target);
+    queue.push(...downstreams);
   }
 
-  return true;
-}
-
-/** 判断某个阶段是否可运行（所有 depends_on 对应的上游节点都成功过） */
-export function canRunStage(
-  stageId: StageId,
-  allStagesStatus: Record<StageId, "idle" | "success" | undefined>
-): boolean {
-  // 简化版：实际依赖检查在运行时由后端兜底（缺上游返回 400）
   return true;
 }

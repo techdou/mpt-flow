@@ -1,40 +1,25 @@
 import { useEffect, useState } from "react";
 import { useCanvasStore } from "./store/canvasStore";
 import { useTaskStore } from "./store/taskStore";
+import { useMetadataStore } from "./store/metadataStore";
 import { fetchStageMetadata } from "./api/stage";
 import { FlowCanvas } from "./components/FlowCanvas";
 import { Sidebar } from "./components/Sidebar";
 import { InspectorPanel } from "./components/InspectorPanel";
 import { TEMPLATES, type Template } from "./workflow/templates";
-import type { StageMeta } from "./workflow/types";
-
-/**
- * 全局 metadata 类型声明（NodeShell 通过 window.__STAGE_METAS__ 读取）
- */
-declare global {
-  interface Window {
-    __STAGE_METAS__?: StageMeta[];
-  }
-}
 
 export default function App() {
   const { loadTemplate, clearCanvas } = useCanvasStore();
   const { resetTaskId } = useTaskStore();
-  const [metas, setMetas] = useState<StageMeta[]>([]);
-  const [metaError, setMetaError] = useState<string | null>(null);
+  const { metas, error: metaError, setMetas, setError } = useMetadataStore();
   const [activeTemplate, setActiveTemplate] = useState<string>("");
 
   // 启动时加载后端节点元数据
   useEffect(() => {
     fetchStageMetadata()
-      .then((data) => {
-        setMetas(data);
-        window.__STAGE_METAS__ = data;
-      })
-      .catch((err) => {
-        setMetaError(err instanceof Error ? err.message : String(err));
-      });
-  }, []);
+      .then((data) => setMetas(data))
+      .catch((err) => setError(err instanceof Error ? err.message : String(err)));
+  }, [setMetas, setError]);
 
   const handleLoadTemplate = (tpl: Template) => {
     loadTemplate(tpl.nodes, tpl.edges);

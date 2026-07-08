@@ -24,6 +24,8 @@ import type { Node } from "@xyflow/react";
 interface TaskState {
   /** 当前工作流的共享 task_id，首次运行某节点时由后端生成 */
   sharedTaskId: string | null;
+  /** 是否有节点正在运行（用于禁用其他节点的运行按钮，防止并发 task_id 分裂） */
+  isRunning: boolean;
 
   runNode: (nodeId: string) => Promise<void>;
   resetTaskId: () => void;
@@ -31,13 +33,19 @@ interface TaskState {
 
 export const useTaskStore = create<TaskState>((set, get) => ({
   sharedTaskId: null,
+  isRunning: false,
 
   resetTaskId: () => set({ sharedTaskId: null }),
 
   runNode: async (nodeId: string) => {
+    // 防并发：已有节点在运行时拒绝新请求，避免 task_id 分裂。
+    if (get().isRunning) return;
+
     const canvas = useCanvasStore.getState();
     const node = canvas.nodes.find((n) => n.id === nodeId);
     if (!node) return;
+
+    set({ isRunning: true });
 
     const stageId = node.data.stageId as StageId;
     const { updateNodeData } = canvas;
@@ -83,6 +91,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       updateNodeData(nodeId, { status: "error", error: message });
+    } finally {
+      set({ isRunning: false });
     }
   },
 }));

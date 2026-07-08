@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useCanvasStore } from "../store/canvasStore";
 import { useTaskStore } from "../store/taskStore";
 import { STAGE_HINTS } from "../workflow/metadata";
@@ -37,6 +38,22 @@ const STAGE_PARAMS: Record<StageId, { key: string; label: string; type: "text" |
 };
 
 /**
+ * select 类型参数的默认值（取 options[0]）。
+ * 节点首次选中时，把这些默认值预填进 params，
+ * 避免"用户不动 select 就不写入"导致运行时字段缺失。
+ */
+function getDefaultParams(stageId: StageId): Record<string, unknown> {
+  const params = STAGE_PARAMS[stageId] || [];
+  const defaults: Record<string, unknown> = {};
+  for (const p of params) {
+    if (p.type === "select" && p.options && p.options.length > 0) {
+      defaults[p.key] = p.options[0];
+    }
+  }
+  return defaults;
+}
+
+/**
  * 右侧参数配置面板。
  *
  * 点击节点后显示该节点的可配置参数。用户填的值存到 node.data.params，
@@ -47,6 +64,21 @@ export function InspectorPanel() {
   const { sharedTaskId, runNode, resetTaskId } = useTaskStore();
 
   const node = nodes.find((n) => n.id === selectedNodeId);
+
+  // 节点选中时预填 select 默认值，避免用户不动 select 时字段缺失。
+  useEffect(() => {
+    if (!node) return;
+    const stageId = node.data.stageId as StageId;
+    const defaults = getDefaultParams(stageId);
+    const missing = Object.entries(defaults).filter(
+      ([k, v]) => node.data.params[k] === undefined
+    );
+    if (missing.length > 0) {
+      const patch: Record<string, unknown> = {};
+      for (const [k, v] of missing) patch[k] = v;
+      updateNodeData(node.id, { params: { ...node.data.params, ...patch } });
+    }
+  }, [selectedNodeId, node, updateNodeData]);
 
   if (!node) {
     return (

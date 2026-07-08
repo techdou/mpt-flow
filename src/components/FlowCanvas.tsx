@@ -1,11 +1,12 @@
-import { useCallback, useRef, type DragEvent } from "react";
+import { useCallback, type DragEvent } from "react";
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
+  useReactFlow,
   type NodeTypes,
-  type Node,
 } from "@xyflow/react";
 import { useCanvasStore } from "../store/canvasStore";
 import { isValidConnection } from "../workflow/engine";
@@ -13,20 +14,16 @@ import { NodeShell } from "./NodeShell";
 import type { StageId } from "../workflow/types";
 
 // 注册节点类型：所有阶段节点都用 NodeShell 渲染
+// 必须定义在组件外，否则每次 render 都创建新对象导致 React Flow 性能问题
 const nodeTypes: NodeTypes = {
   stage: NodeShell,
 };
 
 /**
- * React Flow 画布主体。
- *
- * 职责：
- *   - 渲染节点/边（从 canvasStore 取受控数据）
- *   - 处理 DnD 拖入新节点（从 Sidebar 拖来）
- *   - 处理连线校验（isValidConnection 防环）
+ * 画布内容（必须在 ReactFlowProvider 内才能用 useReactFlow hook）。
+ * 拖拽落点用 screenToFlowPosition 换算，避免缩放/平移后错位。
  */
-export function FlowCanvas() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+function CanvasInner() {
   const {
     nodes,
     edges,
@@ -36,6 +33,7 @@ export function FlowCanvas() {
     setSelectedNode,
     addStageNode,
   } = useCanvasStore();
+  const { screenToFlowPosition } = useReactFlow();
 
   // 拖入新节点
   const onDrop = useCallback(
@@ -44,16 +42,12 @@ export function FlowCanvas() {
       const stageId = e.dataTransfer.getData("application/stage") as StageId;
       if (!stageId) return;
 
-      const bounds = wrapperRef.current?.getBoundingClientRect();
-      if (!bounds) return;
-
-      const position = {
-        x: e.clientX - bounds.left - 100,
-        y: e.clientY - bounds.top - 30,
-      };
+      // screenToFlowPosition 把屏幕坐标换算成画布坐标，
+      // 自动处理缩放和平移，避免手动 clientX - bounds.left 在缩放后错位。
+      const position = screenToFlowPosition({ x: e.clientX, y: e.clientY });
       addStageNode(stageId, position);
     },
-    [addStageNode]
+    [addStageNode, screenToFlowPosition]
   );
 
   const onDragOver = useCallback((e: DragEvent) => {
@@ -62,36 +56,48 @@ export function FlowCanvas() {
   }, []);
 
   return (
-    <div ref={wrapperRef} className="flex-1">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={(conn) => {
-          if (isValidConnection(conn, edges)) {
-            onConnect(conn);
-          }
-        }}
-        onNodeClick={(_, node) => setSelectedNode(node.id)}
-        onPaneClick={() => setSelectedNode(null)}
-        nodeTypes={nodeTypes}
-        onDrop={onDrop}
-        onDragOver={onDragOver}
-        fitView
-        defaultEdgeOptions={{
-          animated: true,
-          style: { stroke: "#30363d", strokeWidth: 2 },
-        }}
-      >
-        <Background color="#21262d" gap={20} />
-        <Controls />
-        <MiniMap
-          nodeColor={() => "#087f8c"}
-          maskColor="rgba(15, 20, 25, 0.7)"
-          style={{ backgroundColor: "#161b22" }}
-        />
-      </ReactFlow>
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={(conn) => {
+        if (isValidConnection(conn, edges)) {
+          onConnect(conn);
+        }
+      }}
+      isValidConnection={(conn) => isValidConnection(conn, edges)}
+      onNodeClick={(_, node) => setSelectedNode(node.id)}
+      onPaneClick={() => setSelectedNode(null)}
+      nodeTypes={nodeTypes}
+      onDrop={onDrop}
+      onDragOver={onDragOver}
+      fitView
+      defaultEdgeOptions={{
+        animated: true,
+        style: { stroke: "#30363d", strokeWidth: 2 },
+      }}
+    >
+      <Background color="#21262d" gap={20} />
+      <Controls />
+      <MiniMap
+        nodeColor={() => "#087f8c"}
+        maskColor="rgba(15, 20, 25, 0.7)"
+        style={{ backgroundColor: "#161b22" }}
+      />
+    </ReactFlow>
+  );
+}
+
+/**
+ * 画布外壳：用 ReactFlowProvider 包裹，让内部能用 useReactFlow hook。
+ */
+export function FlowCanvas() {
+  return (
+    <div className="flex-1">
+      <ReactFlowProvider>
+        <CanvasInner />
+      </ReactFlowProvider>
     </div>
   );
 }

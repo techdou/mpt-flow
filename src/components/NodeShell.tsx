@@ -3,6 +3,7 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { FlowNodeData, NodeStatus, StageId } from "../workflow/types";
 import { NodeTooltip } from "./NodeTooltip";
 import { useCanvasStore } from "../store/canvasStore";
+import { useMetadataStore } from "../store/metadataStore";
 import { useTaskStore } from "../store/taskStore";
 
 /** 状态对应的颜色和文字 */
@@ -35,13 +36,13 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
   const style = STATUS_STYLES[status];
   const [hovered, setHovered] = useState(false);
 
-  const { setSelectedNode, nodes } = useCanvasStore();
-  const { runNode } = useTaskStore();
+  const setSelectedNode = useCanvasStore((s) => s.setSelectedNode);
+  const { runNode, isRunning } = useTaskStore();
 
-  // 从全局 metadata store 里找这个阶段的元数据（App 层加载后注入 window）
-  // 这里用一个简单的方式：直接从 props 上下文取
-  const metas = (window.__STAGE_METAS__ || []) as any[];
-  const meta = metas.find((m) => m.id === nodeData.stageId);
+  // 从 metadataStore 响应式订阅（App 层加载后写入）
+  const meta = useMetadataStore((s) =>
+    s.metas.find((m) => m.id === nodeData.stageId)
+  );
 
   const handleRun = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -85,7 +86,7 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
         </span>
         <button
           onClick={handleRun}
-          disabled={status === "running"}
+          disabled={status === "running" || isRunning}
           className="ml-auto rounded bg-mpt-teal px-2 py-0.5 text-xs font-medium text-white hover:bg-mpt-teal/80 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {status === "running" ? "..." : "运行"}
