@@ -7,16 +7,21 @@ import {
   MiniMap,
   useReactFlow,
   type NodeTypes,
+  type EdgeTypes,
 } from "@xyflow/react";
 import { useCanvasStore } from "../store/canvasStore";
 import { isValidConnection } from "../workflow/engine";
 import { NodeShell } from "./NodeShell";
+import { DeletableEdge } from "./DeletableEdge";
 import type { StageId } from "../workflow/types";
 
-// 注册节点类型：所有阶段节点都用 NodeShell 渲染
-// 必须定义在组件外，否则每次 render 都创建新对象导致 React Flow 性能问题
+// 注册节点/边类型：必须定义在组件外，否则每次 render 都创建新对象导致性能问题
 const nodeTypes: NodeTypes = {
   stage: NodeShell,
+};
+
+const edgeTypes: EdgeTypes = {
+  deletable: DeletableEdge,
 };
 
 /**
@@ -69,14 +74,15 @@ function CanvasInner() {
       isValidConnection={(conn) => isValidConnection(conn, edges)}
       onNodeClick={(_, node) => setSelectedNode(node.id)}
       onPaneClick={() => setSelectedNode(null)}
-      nodeTypes={nodeTypes}
-      onDrop={onDrop}
-      onDragOver={onDragOver}
-      fitView
-      defaultEdgeOptions={{
-        animated: true,
-        style: { stroke: "#30363d", strokeWidth: 2 },
-      }}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        fitView
+        defaultEdgeOptions={{
+          type: "deletable",
+          animated: true,
+        }}
     >
       <Background color="#21262d" gap={20} />
       <Controls />

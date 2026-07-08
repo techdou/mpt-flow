@@ -37,6 +37,7 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
   const [hovered, setHovered] = useState(false);
 
   const setSelectedNode = useCanvasStore((s) => s.setSelectedNode);
+  const deleteNode = useCanvasStore((s) => s.deleteNode);
   const { runNode, isRunning } = useTaskStore();
 
   // 从 metadataStore 响应式订阅（App 层加载后写入）
@@ -90,6 +91,20 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
         <div className="absolute left-full top-0 z-50 ml-3">
           <NodeTooltip meta={meta} />
         </div>
+      )}
+
+      {/* 删除按钮：选中时显示，运行中禁用 */}
+      {selected && status !== "running" && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            deleteNode(id);
+          }}
+          className="absolute -right-2 -top-2 z-50 flex h-5 w-5 items-center justify-center rounded-full border border-mpt-red bg-mpt-panel text-xs text-mpt-red hover:bg-mpt-red hover:text-white"
+          title="删除节点"
+        >
+          ×
+        </button>
       )}
 
       {/* 标题栏 */}

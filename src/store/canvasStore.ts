@@ -42,6 +42,12 @@ interface CanvasState {
   /** 在画布上添加一个新节点 */
   addStageNode: (stageId: StageId, position: { x: number; y: number }) => string;
 
+  /** 删除指定节点（同时删除连到它的边） */
+  deleteNode: (id: string) => void;
+
+  /** 删除指定连线 */
+  deleteEdge: (id: string) => void;
+
   /** 加载预设模板（替换整个画布） */
   loadTemplate: (nodes: Node<FlowNodeData>[], edges: Edge[]) => void;
 
@@ -90,6 +96,16 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     set({ nodes: [...get().nodes, newNode] });
     return id;
   },
+
+  deleteNode: (id) =>
+    set({
+      // 删节点的同时，删掉所有连到它的边（source 或 target 是它）
+      nodes: get().nodes.filter((n) => n.id !== id),
+      edges: get().edges.filter((e) => e.source !== id && e.target !== id),
+      selectedNodeId: get().selectedNodeId === id ? null : get().selectedNodeId,
+    }),
+
+  deleteEdge: (id) => set({ edges: get().edges.filter((e) => e.id !== id) }),
 
   loadTemplate: (nodes, edges) => set({ nodes, edges, selectedNodeId: null }),
 

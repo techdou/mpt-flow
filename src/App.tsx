@@ -66,6 +66,11 @@ export default function App() {
           </button>
         </div>
 
+        {/* 操作提示 */}
+        <div className="ml-3 hidden font-mono text-xs text-mpt-muted/60 lg:flex">
+          选中节点/连线后按 Backspace 删除，或点 × 按钮
+        </div>
+
         {/* 后端连接状态 */}
         <div className="ml-auto flex items-center gap-2">
           {metaError ? (
