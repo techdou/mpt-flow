@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background-color: #0f1419;
+  color: #e6edf3;
+}
+
+/* React Flow 暗色主题覆盖 */
+.react-flow {
+  background-color: #0d1117;
+}
+
+.react-flow__node {
+  font-family: inherit;
+}
+
+.react-flow__edge-path {
+  stroke: #30363d;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path,
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: #087f8c;
+  stroke-width: 2.5;
+}
+
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  background: #087f8c;
+  border: 2px solid #0f1419;
+}
+
+.react-flow__handle:hover {
+  background: #e83d3d;
+}
+
+.react-flow__controls {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  color: #e6edf3;
+  fill: #e6edf3;
+}
+
+.react-flow__controls-button:hover {
+  background: #21262d;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
