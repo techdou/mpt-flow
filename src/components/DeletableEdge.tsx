@@ -49,6 +49,16 @@ function DeletableEdgeInner({
           strokeWidth: visible ? 2.5 : 2,
         }}
       />
+      {/* 不可见的粗命中区域：覆盖整条连线，让鼠标在线上任意位置都能触发显示 × 按钮 */}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke="transparent"
+        strokeWidth={20}
+        style={{ pointerEvents: "stroke", cursor: "pointer" }}
+        onMouseEnter={() => setVisible(true)}
+        onMouseLeave={() => setVisible(false)}
+      />
       <EdgeLabelRenderer>
         <div
           style={{

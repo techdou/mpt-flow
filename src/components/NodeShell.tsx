@@ -103,7 +103,7 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
             e.stopPropagation();
             deleteNode(id);
           }}
-          className="absolute -right-2 -top-2 z-50 flex h-5 w-5 items-center justify-center rounded-full border border-mpt-red bg-mpt-panel text-xs text-mpt-red hover:bg-mpt-red hover:text-white"
+          className="absolute -right-2 -top-2 z-[60] flex h-5 w-5 items-center justify-center rounded-full border border-mpt-red bg-mpt-panel text-xs text-mpt-red hover:bg-mpt-red hover:text-white"
           title="删除节点"
         >
           ×
