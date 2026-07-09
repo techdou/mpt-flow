@@ -1,35 +1,54 @@
 # MPT Flow · 视频生成工作流编排
 
+[English](#english) · 简体中文
+
 MoneyPrinterTurbo 的节点画布前端。把视频生成 pipeline 的每一步（脚本→关键词→配音→字幕→素材→合成）变成可拖拽、可连线、可悬停查看说明的节点。
+
+## 功能特性
+
+- 🎨 **节点画布** — 拖拽式编排视频生成流水线
+- 🔗 **智能连线** — 自动校验依赖关系，防止成环
+- ▶️ **单节点运行** — 只跑流水线中某个阶段，不必整条重跑
+- 💡 **悬停说明** — 鼠标移到节点上，弹出"做什么/何时用/踩坑提示"
+- 📋 **预设模板** — 一键加载「完整流程」「仅文案」「配音+字幕」
+- 🌗 **暗色主题** — 复刻 MoneyPrinterTurbo WebUI 的红/青/金配色
 
 ## 技术栈
 
-- **Vite 5 + React 18 + TypeScript**
-- **@xyflow/react v12**（React Flow 节点画布）
-- **Zustand**（状态管理）
-- **Tailwind CSS v3**（样式，暗色主题，复刻 webui 红/青/金配色）
+| 维度 | 选型 |
+|------|------|
+| 构建 | Vite 5 |
+| 框架 | React 18 + TypeScript |
+| 画布 | [@xyflow/react](https://reactflow.dev/) v12 (React Flow) |
+| 状态 | Zustand |
+| 样式 | Tailwind CSS v3 |
 
-## 前置条件
+## 快速开始
 
-需要先启动 MoneyPrinterTurbo 后端（带 stage API 的版本）：
+### 前置条件
+
+- Node.js ≥ 18
+- MoneyPrinterTurbo 后端（需含 stage API，位于 `feat/workflow-stage-api` 分支）
+
+### 启动后端
 
 ```bash
-cd E:\projects\generate_videos\MoneyPrinterTurbo
-python main.py  # 默认监听 18080
+cd MoneyPrinterTurbo
+python main.py          # 默认监听 127.0.0.1:18081
 ```
 
-本项目 dev server 默认连接 `http://127.0.0.1:18081`（在 `vite.config.ts` 里改）。
+> 后端监听端口可在 `config.toml` 的 `listen_port` 修改。前端连接地址在 [`vite.config.ts`](vite.config.ts) 的 `server.proxy.target` 里同步修改。
 
-## 启动
+### 启动前端
 
 ```bash
-cd E:\projects\mpt-flow
 npm install
-npm run dev      # 启动 dev server，http://localhost:5174
-npm run build    # 生产构建
+npm run dev             # http://localhost:5174
+npm run build           # 生产构建到 dist/
+npm run preview         # 预览生产构建
 ```
 
-## 架构
+## 项目结构
 
 ```
 src/
@@ -38,7 +57,8 @@ src/
 │   └── stage.ts           # 单阶段触发 + metadata API 封装
 ├── store/
 │   ├── canvasStore.ts     # Zustand: 画布节点/边/选中态
-│   └── taskStore.ts       # Zustand: 运行节点（收集上游→调API→更新状态）
+│   ├── taskStore.ts       # Zustand: 运行节点（收集上游→调API→更新状态）
+│   └── metadataStore.ts   # Zustand: 从后端加载节点元数据
 ├── workflow/
 │   ├── types.ts           # FlowNodeData / StageId / StageMeta 类型
 │   ├── engine.ts          # BFS 收集上游产物 + 连线校验
@@ -49,7 +69,8 @@ src/
 │   ├── NodeShell.tsx      # 通用节点外壳（状态灯+运行按钮+Handle）
 │   ├── NodeTooltip.tsx    # 悬停说明气泡（核心交互）
 │   ├── Sidebar.tsx        # 左侧节点拖拽面板
-│   └── InspectorPanel.tsx # 右侧参数配置面板
+│   ├── InspectorPanel.tsx # 右侧参数配置面板
+│   └── DeletableEdge.tsx  # 可删除连线（×按钮 + 透明hit-area）
 └── App.tsx                # 顶层组装 + metadata 加载 + 模板工具栏
 ```
 
@@ -63,7 +84,7 @@ src/
 
 **预设模板**：顶部工具栏一键加载「完整流程」「仅文案」「配音+字幕」三种模板，加载后仍可自由增删节点。
 
-## 后端 API（MoneyPrinterTurbo feat/workflow-stage-api 分支）
+## 后端 API 契约
 
 | 端点 | 说明 |
 |------|------|
@@ -74,3 +95,35 @@ src/
 | `POST /api/v1/stage/materials` | 单独跑素材获取 |
 | `POST /api/v1/stage/render` | 单独跑视频合成 |
 | `GET /api/v1/stage/metadata` | 6 个节点的中英文元数据 |
+
+> 后端阻塞式 API，无实时进度推送。前端用 indeterminate 进度条 + 真实耗时计时器。
+
+## 开发说明
+
+- **TypeScript 检查**：`npx tsc --noEmit`
+- **生产构建**：`npm run build`（先 `tsc -b` 再 `vite build`）
+
+---
+
+## English
+
+A node-canvas frontend for MoneyPrinterTurbo. Turns each step of the video-generation pipeline (script → terms → audio → subtitle → materials → render) into a draggable, connectable node with hover-to-explain tooltips.
+
+### Quick Start
+
+```bash
+# 1. Start the MoneyPrinterTurbo backend (with stage API) on :18081
+cd MoneyPrinterTurbo && python main.py
+
+# 2. Start this frontend
+npm install
+npm run dev             # http://localhost:5174
+```
+
+### Tech Stack
+
+Vite 5 · React 18 · TypeScript · @xyflow/react v12 · Zustand · Tailwind CSS v3
+
+## License
+
+MIT
