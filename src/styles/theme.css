@@ -2,78 +2,120 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 字体通过 index.html 的 <link> 标签加载，避免 CSS @import 顺序冲突 */
+
 :root {
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: "Noto Sans SC", "Inter", PingFang SC, Microsoft YaHei, sans-serif;
   color-scheme: dark;
 }
 
 body {
   margin: 0;
-  background-color: #0f1419;
+  background-color: #080a0d;
   color: #e6edf3;
 }
 
-/* React Flow 暗色主题覆盖 */
+/* ---- 统一过渡(微交互) ---- */
+button,
+input,
+select,
+textarea {
+  transition: all 150ms ease-out;
+}
+
+/* ---- React Flow 画布氛围 ---- */
 .react-flow {
-  background-color: #0d1117;
+  background-color: #0a0d12;
+  /* 环境光晕：teal 左上角 + 红 右下角,营造暗房/剪辑台氛围 */
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(8, 127, 140, 0.07), transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(232, 61, 61, 0.04), transparent 45%);
 }
 
 .react-flow__node {
   font-family: inherit;
 }
 
+/* ---- 连线 ---- */
 .react-flow__edge-path {
-  stroke: #30363d;
-  stroke-width: 2;
+  stroke: rgba(8, 127, 140, 0.5);
+  stroke-width: 2.5;
 }
 
 .react-flow__edge.selected .react-flow__edge-path,
 .react-flow__edge:hover .react-flow__edge-path {
-  stroke: #087f8c;
-  stroke-width: 2.5;
+  stroke: #0cc2d8;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px rgba(8, 127, 140, 0.5));
 }
 
+/* ---- Handle(连接点) ---- */
 .react-flow__handle {
   width: 10px;
   height: 10px;
   background: #087f8c;
-  border: 2px solid #0f1419;
+  border: 2px solid #11161d;
 }
 
 .react-flow__handle:hover {
   background: #e83d3d;
+  transform: scale(1.2);
 }
 
+/* ---- 控件 ---- */
 .react-flow__controls {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 6px;
+  background: #11161d;
+  border: 1px solid #232b35;
+  border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .react-flow__controls-button {
-  background: #161b22;
-  border-bottom: 1px solid #30363d;
-  color: #e6edf3;
-  fill: #e6edf3;
+  background: #11161d;
+  border-bottom: 1px solid #232b35;
+  color: #9ba6b2;
+  fill: #9ba6b2;
 }
 
 .react-flow__controls-button:hover {
-  background: #21262d;
+  background: #171d25;
+  color: #087f8c;
+  fill: #087f8c;
 }
 
-/* 自定义滚动条 */
+/* ---- 自定义滚动条 ---- */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d1117;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #30363d;
-  border-radius: 4px;
+  background: #232b35;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #484f58;
+  background: #354049;
+}
+
+/* ---- 全局 focus-visible ---- */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(8, 127, 140, 0.4);
+}
+
+/* ---- 可访问性:减少动效 ---- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

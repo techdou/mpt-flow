@@ -7,7 +7,9 @@
     "hint": "Select a node/edge then press Backspace to delete, or click the × button",
     "backendDisconnected": "● Backend offline",
     "backendConnected": "● Backend connected ({{count}} stages)",
-    "backendConnecting": "● Connecting..."
+    "backendConnecting": "● Connecting...",
+    "emptyHint": "Drag nodes from the left, or pick a template above",
+    "emptyHintSub": "Full Pipeline · 6 stages"
   },
   "sidebar": {
     "title": "Node Library",

@@ -3,15 +3,8 @@ import type { DragEvent, KeyboardEvent } from "react";
 import type { StageId } from "../workflow/types";
 import { STAGE_ORDER, STAGE_HINTS } from "../workflow/metadata";
 import { useCanvasStore } from "../store/canvasStore";
-
-const STAGE_ICONS: Record<StageId, string> = {
-  script: "📝",
-  terms: "🔍",
-  audio: "🔊",
-  subtitle: "💬",
-  materials: "🎬",
-  render: "🎞️",
-};
+import { StageIcon } from "./StageIcon";
+import { stageColor } from "../workflow/stageVisuals";
 
 /**
  * 左侧节点拖拽面板。
@@ -30,8 +23,6 @@ export function Sidebar() {
     e.dataTransfer.effectAllowed = "move";
   };
 
-  // 键盘添加：在画布中心附近放节点，用已有节点数做偏移避免重叠。
-  // 位置不精确没关系——FlowCanvas 会 watch lastAddedNodeId 并 fitView 让它可见。
   const onKeyDown = (e: KeyboardEvent, stageId: StageId) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
@@ -42,22 +33,21 @@ export function Sidebar() {
     });
   };
 
-  // 短名称 helper：取 hint.what 的第一句作为侧栏显示名
   const shortName = (stageId: StageId): string => {
     const text = STAGE_HINTS[stageId].what[lang];
     return text.split("，")[0].split("。")[0].split(",")[0].split(".")[0];
   };
 
   return (
-    <div className="flex w-56 flex-col border-r border-mpt-border bg-mpt-dark">
-      <div className="px-4 py-3">
-        <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-mpt-teal">
+    <div className="flex w-56 flex-col border-r border-mpt-border bg-mpt-panel">
+      <div className="border-b border-mpt-border px-4 py-3">
+        <h2 className="font-heading text-xs font-bold uppercase tracking-wider text-mpt-teal">
           {t("sidebar.title")}
         </h2>
         <p className="mt-1 text-xs text-mpt-muted">{t("sidebar.subtitle")}</p>
       </div>
 
-      <div className="flex-1 space-y-2 overflow-y-auto px-3 pb-4">
+      <div className="flex-1 space-y-2 overflow-y-auto p-3">
         {STAGE_ORDER.map((stageId) => (
           <div
             key={stageId}
@@ -67,15 +57,18 @@ export function Sidebar() {
             tabIndex={0}
             role="button"
             aria-label={t("sidebar.addNode", { name: shortName(stageId) })}
-            className="cursor-grab rounded-lg border border-mpt-border bg-mpt-panel p-3 transition-colors hover:border-mpt-teal focus:border-mpt-teal focus:outline-none focus:ring-1 focus:ring-mpt-teal active:cursor-grabbing"
+            className="group cursor-grab rounded-lg border border-mpt-border bg-mpt-elevated p-3 transition-all hover:-translate-y-0.5 hover:border-mpt-teal/50 hover:shadow-md focus:border-mpt-teal focus:outline-none focus:ring-1 focus:ring-mpt-teal active:cursor-grabbing"
+            style={{ borderLeft: `3px solid ${stageColor(stageId)}` }}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{STAGE_ICONS[stageId]}</span>
-              <div>
-                <div className="text-sm font-medium text-white">
-                  {shortName(stageId)}
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-mpt-dark">
+                <StageIcon stageId={stageId} className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium text-white group-hover:text-mpt-teal">
+                  {t(`node.stageName.${stageId}`)}
                 </div>
-                <div className="font-mono text-xs text-mpt-muted">{stageId}</div>
+                <div className="font-mono text-[10px] text-mpt-muted">{stageId}</div>
               </div>
             </div>
           </div>

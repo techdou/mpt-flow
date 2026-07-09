@@ -40,14 +40,14 @@ export default function App() {
   return (
     <div className="flex h-screen flex-col">
       {/* 顶部工具栏 */}
-      <header className="flex items-center gap-3 border-b border-mpt-border bg-mpt-dark px-4 py-2">
+      <header className="flex items-center gap-3 border-b border-mpt-border bg-mpt-panel px-4 py-2.5">
         <div className="flex items-baseline gap-2">
-          <h1 className="font-mono text-sm font-bold text-mpt-teal">MPT Flow</h1>
-          <span className="text-xs text-mpt-muted">{t("app.subtitle")}</span>
+          <h1 className="font-heading text-base font-bold tracking-tight text-mpt-teal">MPT Flow</h1>
+          <span className="hidden text-xs text-mpt-muted sm:inline">{t("app.subtitle")}</span>
         </div>
 
         <div className="ml-4 flex items-center gap-2">
-          <span className="font-mono text-xs text-mpt-muted">{t("app.template")}</span>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-mpt-muted">{t("app.template")}</span>
           {TEMPLATES.map((tpl) => (
             <button
               key={tpl.id}

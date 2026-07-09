@@ -7,7 +7,9 @@
     "hint": "选中节点/连线后按 Backspace 删除，或点 × 按钮",
     "backendDisconnected": "● 后端未连接",
     "backendConnected": "● 后端已连接（{{count}} 个阶段）",
-    "backendConnecting": "● 连接中..."
+    "backendConnecting": "● 连接中...",
+    "emptyHint": "从左侧拖拽节点，或选择上方模板",
+    "emptyHintSub": "完整流程 · 6 个阶段"
   },
   "sidebar": {
     "title": "节点库",
