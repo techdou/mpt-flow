@@ -1,20 +1,24 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        // 三级暗色层次：画布(最深) → 面板 → 浮层
         mpt: {
+          // 品牌色（亮暗一致）
           red: "#e83d3d",
           teal: "#087f8c",
           gold: "#d99a00",
-          dark: "#080a0d",      // 最深：画布/页面底色
-          canvas: "#0a0d12",    // 画布区(带氛围)
-          panel: "#11161d",     // 面板
-          elevated: "#171d25",  // 弹窗/浮层/卡片
-          border: "#232b35",    // 边框(提亮)
-          muted: "#9ba6b2",     // 次要文字(提亮, 达 WCAG AA)
+          // 结构色 → CSS 变量（:root 亮 / .dark 暗）
+          dark: "var(--mpt-dark)",
+          canvas: "var(--mpt-canvas)",
+          panel: "var(--mpt-panel)",
+          elevated: "var(--mpt-elevated)",
+          border: "var(--mpt-border)",
+          muted: "var(--mpt-muted)",
+          foreground: "var(--mpt-foreground)",
+          success: "var(--mpt-success)",
         },
       },
       fontFamily: {

@@ -2,17 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 字体通过 index.html 的 <link> 标签加载，避免 CSS @import 顺序冲突 */
+/* ===== 亮色主题（默认 :root） ===== */
+:root {
+  --mpt-dark: #eaeef3;        /* 页面底色（最浅） */
+  --mpt-canvas: #e0e5ec;      /* 画布 */
+  --mpt-panel: #ffffff;       /* 面板 */
+  --mpt-elevated: #f5f7fa;    /* 浮层/卡片 */
+  --mpt-border: #d1d9e2;      /* 边框 */
+  --mpt-muted: #5a6573;       /* 次要文字 */
+  --mpt-foreground: #1a2330;  /* 主文字 */
+  --mpt-success: #2ea043;     /* 成功色 */
+  --mpt-edge: #8b9aa8;        /* 连线灰 */
+  --mpt-grid: #d2d9e1;        /* 画布网格点 */
+  --mpt-scroll-hover: #b0bbc7;
+  --mpt-glow-teal: rgba(8, 127, 140, 0.08);
+  --mpt-glow-red: rgba(232, 61, 61, 0.05);
+  --mpt-handle-border: #ffffff;
+  --mpt-overlay: rgba(0, 0, 0, 0.3);
+  --mpt-shadow: rgba(0, 0, 0, 0.12);
+}
+
+/* ===== 暗色主题 ===== */
+.dark {
+  --mpt-dark: #080a0d;
+  --mpt-canvas: #0a0d12;
+  --mpt-panel: #11161d;
+  --mpt-elevated: #171d25;
+  --mpt-border: #232b35;
+  --mpt-muted: #9ba6b2;
+  --mpt-foreground: #e6edf3;
+  --mpt-success: #3fb950;
+  --mpt-edge: rgba(8, 127, 140, 0.5);
+  --mpt-grid: #1a212b;
+  --mpt-scroll-hover: #354049;
+  --mpt-glow-teal: rgba(8, 127, 140, 0.07);
+  --mpt-glow-red: rgba(232, 61, 61, 0.04);
+  --mpt-handle-border: #11161d;
+  --mpt-overlay: rgba(0, 0, 0, 0.6);
+  --mpt-shadow: rgba(0, 0, 0, 0.4);
+}
 
 :root {
   font-family: "Noto Sans SC", "Inter", PingFang SC, Microsoft YaHei, sans-serif;
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 body {
   margin: 0;
-  background-color: #080a0d;
-  color: #e6edf3;
+  background-color: var(--mpt-dark);
+  color: var(--mpt-foreground);
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 /* ---- 统一过渡(微交互) ---- */
@@ -25,11 +64,10 @@ textarea {
 
 /* ---- React Flow 画布氛围 ---- */
 .react-flow {
-  background-color: #0a0d12;
-  /* 环境光晕：teal 左上角 + 红 右下角,营造暗房/剪辑台氛围 */
+  background-color: var(--mpt-canvas);
   background-image:
-    radial-gradient(circle at 15% 15%, rgba(8, 127, 140, 0.07), transparent 45%),
-    radial-gradient(circle at 85% 85%, rgba(232, 61, 61, 0.04), transparent 45%);
+    radial-gradient(circle at 15% 15%, var(--mpt-glow-teal), transparent 45%),
+    radial-gradient(circle at 85% 85%, var(--mpt-glow-red), transparent 45%);
 }
 
 .react-flow__node {
@@ -38,13 +76,13 @@ textarea {
 
 /* ---- 连线 ---- */
 .react-flow__edge-path {
-  stroke: rgba(8, 127, 140, 0.5);
+  stroke: var(--mpt-edge);
   stroke-width: 2.5;
 }
 
 .react-flow__edge.selected .react-flow__edge-path,
 .react-flow__edge:hover .react-flow__edge-path {
-  stroke: #0cc2d8;
+  stroke: #087f8c;
   stroke-width: 3;
   filter: drop-shadow(0 0 4px rgba(8, 127, 140, 0.5));
 }
@@ -54,7 +92,7 @@ textarea {
   width: 10px;
   height: 10px;
   background: #087f8c;
-  border: 2px solid #11161d;
+  border: 2px solid var(--mpt-handle-border);
 }
 
 .react-flow__handle:hover {
@@ -64,22 +102,22 @@ textarea {
 
 /* ---- 控件 ---- */
 .react-flow__controls {
-  background: #11161d;
-  border: 1px solid #232b35;
+  background: var(--mpt-panel);
+  border: 1px solid var(--mpt-border);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px var(--mpt-shadow);
 }
 
 .react-flow__controls-button {
-  background: #11161d;
-  border-bottom: 1px solid #232b35;
-  color: #9ba6b2;
-  fill: #9ba6b2;
+  background: var(--mpt-panel);
+  border-bottom: 1px solid var(--mpt-border);
+  color: var(--mpt-muted);
+  fill: var(--mpt-muted);
 }
 
 .react-flow__controls-button:hover {
-  background: #171d25;
+  background: var(--mpt-elevated);
   color: #087f8c;
   fill: #087f8c;
 }
@@ -93,11 +131,11 @@ textarea {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #232b35;
+  background: var(--mpt-border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #354049;
+  background: var(--mpt-scroll-hover);
 }
 
 /* ---- 全局 focus-visible ---- */

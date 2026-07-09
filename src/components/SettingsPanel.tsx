@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useSettingsStore, type Language } from "../store/settingsStore";
+import { useSettingsStore, type Language, type Theme } from "../store/settingsStore";
 import { updateClientConfig } from "../api/client";
 import { STAGE_PARAMS } from "../workflow/stageParams";
 import { STAGE_ORDER } from "../workflow/metadata";
@@ -16,6 +16,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const {
     language, setLanguage,
+    theme, setTheme,
     apiBaseUrl, setApiBaseUrl,
     timeout, setTimeout: setTimeoutStore,
     defaultParams, setDefaultParam,
@@ -65,7 +66,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   };
 
   const inputClass =
-    "w-full rounded-md border border-mpt-border bg-mpt-elevated px-2.5 py-1.5 text-xs text-white focus:border-mpt-teal focus:outline-none";
+    "w-full rounded-md border border-mpt-border bg-mpt-elevated px-2.5 py-1.5 text-xs text-mpt-foreground focus:border-mpt-teal focus:outline-none";
 
   return (
     <div
@@ -81,7 +82,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           <h2 className="font-heading text-sm font-bold text-mpt-teal">{t("settings.title")}</h2>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-mpt-muted transition-colors hover:bg-mpt-elevated hover:text-white"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-mpt-muted transition-colors hover:bg-mpt-elevated hover:text-mpt-foreground"
             title={t("settings.close")}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -106,7 +107,23 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             </select>
           </section>
 
-          {/* 2. 后端地址 */}
+          {/* 2. 主题 */}
+          <section>
+            <label className="mb-1.5 block text-xs font-medium text-mpt-teal">
+              {t("settings.theme")}
+            </label>
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as Theme)}
+              className={inputClass}
+            >
+              <option value="dark" className="bg-mpt-elevated">{t("settings.themeDark")}</option>
+              <option value="light" className="bg-mpt-elevated">{t("settings.themeLight")}</option>
+              <option value="system" className="bg-mpt-elevated">{t("settings.themeSystem")}</option>
+            </select>
+          </section>
+
+          {/* 3. 后端地址 */}
           <section>
             <label className="mb-1.5 block text-xs font-medium text-mpt-teal">
               {t("settings.apiBaseUrl")}
@@ -156,7 +173,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
                       className="flex w-full items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-mpt-elevated"
                     >
                       <StageIcon stageId={stageId} className="h-4 w-4 shrink-0" />
-                      <span className="text-xs font-medium text-white">{t(`node.stageName.${stageId}`)}</span>
+                      <span className="text-xs font-medium text-mpt-foreground">{t(`node.stageName.${stageId}`)}</span>
                       <span className="font-mono text-[10px] text-mpt-muted">{stageId}</span>
                       <svg
                         className={`ml-auto h-3 w-3 text-mpt-muted transition-transform ${isOpen ? "rotate-90" : ""}`}
@@ -216,13 +233,13 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="rounded-md px-3 py-1.5 text-xs text-mpt-muted transition-colors hover:text-white"
+              className="rounded-md px-3 py-1.5 text-xs text-mpt-muted transition-colors hover:text-mpt-foreground"
             >
               {t("settings.close")}
             </button>
             <button
               onClick={handleSave}
-              className="min-w-[80px] rounded-md bg-mpt-teal px-4 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              className="min-w-[80px] rounded-md bg-mpt-teal px-4 py-1.5 text-xs font-semibold text-mpt-foreground transition-opacity hover:opacity-90"
             >
               {t("settings.save")}
             </button>

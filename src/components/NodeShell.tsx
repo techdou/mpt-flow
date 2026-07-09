@@ -13,7 +13,7 @@ import { stageColor } from "../workflow/stageVisuals";
 const STATUS_PILL: Record<NodeStatus, { bg: string; text: string; dot: string }> = {
   idle: { bg: "bg-mpt-border/40", text: "text-mpt-muted", dot: "bg-mpt-muted" },
   running: { bg: "bg-mpt-gold/20", text: "text-mpt-gold", dot: "bg-mpt-gold animate-pulse" },
-  success: { bg: "bg-green-500/20", text: "text-green-400", dot: "bg-green-400" },
+  success: { bg: "bg-mpt-success/20", text: "text-mpt-success", dot: "bg-mpt-success" },
   error: { bg: "bg-mpt-red/20", text: "text-mpt-red", dot: "bg-mpt-red" },
 };
 
@@ -99,7 +99,7 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
             e.stopPropagation();
             deleteNode(id);
           }}
-          className="absolute -right-2 -top-2 z-[60] flex h-6 w-6 items-center justify-center rounded-full border border-mpt-red bg-mpt-panel text-mpt-red transition-transform hover:scale-110 hover:bg-mpt-red hover:text-white"
+          className="absolute -right-2 -top-2 z-[60] flex h-6 w-6 items-center justify-center rounded-full border border-mpt-red bg-mpt-panel text-mpt-red transition-transform hover:scale-110 hover:bg-mpt-red hover:text-mpt-foreground"
           title={t("node.deleteNode")}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
@@ -111,7 +111,7 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
       {/* 标题栏 */}
       <div className="flex items-center gap-2 px-3 py-2.5">
         <StageIcon stageId={nodeData.stageId} className="h-5 w-5 shrink-0" />
-        <span className="text-sm font-heading font-bold text-white">
+        <span className="text-sm font-heading font-bold text-mpt-foreground">
           {t(`node.stageName.${nodeData.stageId}`)}
         </span>
         {/* 状态 pill */}
@@ -123,7 +123,7 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
         <button
           onClick={handleRun}
           disabled={status === "running" || isRunning}
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded text-white transition-colors hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+          className="ml-auto flex h-6 w-6 items-center justify-center rounded text-mpt-foreground transition-colors hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
           style={{ backgroundColor: color }}
           title={status === "running" ? t("node.runButton.running") : t("node.runButton.run")}
         >

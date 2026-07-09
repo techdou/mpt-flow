@@ -106,6 +106,10 @@
   "settings": {
     "title": "设置",
     "language": "界面语言",
+    "theme": "主题",
+    "themeDark": "暗色",
+    "themeLight": "亮色",
+    "themeSystem": "跟随系统",
     "apiBaseUrl": "后端地址",
     "apiBaseUrlHint": "留空则走 vite proxy（dev 默认）。填写后直连后端，如 http://127.0.0.1:18081",
     "timeout": "请求超时（秒）",

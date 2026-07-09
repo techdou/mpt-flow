@@ -103,7 +103,7 @@ function CanvasInner() {
           markerEnd: { type: MarkerType.ArrowClosed, color: "#087f8c", width: 16, height: 16 },
         }}
       >
-        <Background color="#1a212b" gap={24} size={1} />
+        <Background color="var(--mpt-grid)" gap={24} size={1} />
         <Controls showInteractive={false} />
         <MiniMap
           nodeColor={(node) => {
@@ -111,10 +111,10 @@ function CanvasInner() {
             return stageColor(data.stageId);
           }}
           nodeStrokeWidth={2}
-          maskColor="rgba(8, 10, 13, 0.7)"
+          maskColor="var(--mpt-overlay)"
           style={{
-            backgroundColor: "#11161d",
-            border: "1px solid #232b35",
+            backgroundColor: "var(--mpt-panel)",
+            border: "1px solid var(--mpt-border)",
             borderRadius: "8px",
           }}
         />

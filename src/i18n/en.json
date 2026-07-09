@@ -106,6 +106,10 @@
   "settings": {
     "title": "Settings",
     "language": "Interface Language",
+    "theme": "Theme",
+    "themeDark": "Dark",
+    "themeLight": "Light",
+    "themeSystem": "System",
     "apiBaseUrl": "Backend URL",
     "apiBaseUrlHint": "Leave empty to use vite proxy (dev default). Or set a direct URL, e.g. http://127.0.0.1:18081",
     "timeout": "Request Timeout (s)",

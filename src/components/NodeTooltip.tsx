@@ -36,7 +36,7 @@ export function NodeTooltip({ meta }: { meta: StageMeta | undefined }) {
         {/* 标题 */}
         <div className="mb-2.5 flex items-center gap-2">
           <StageIcon stageId={meta.id} className="h-5 w-5 shrink-0" />
-          <span className="text-sm font-heading font-bold text-white">{meta.name[lang]}</span>
+          <span className="text-sm font-heading font-bold text-mpt-foreground">{meta.name[lang]}</span>
           <span className="ml-auto shrink-0 rounded-full bg-mpt-elevated px-2 py-0.5 font-mono text-[10px] text-mpt-muted">
             {meta.typical_duration}
           </span>

@@ -65,7 +65,7 @@ export function Sidebar() {
                 <StageIcon stageId={stageId} className="h-4 w-4" />
               </span>
               <div className="min-w-0">
-                <div className="truncate text-sm font-medium text-white group-hover:text-mpt-teal">
+                <div className="truncate text-sm font-medium text-mpt-foreground group-hover:text-mpt-teal">
                   {t(`node.stageName.${stageId}`)}
                 </div>
                 <div className="font-mono text-[10px] text-mpt-muted">{stageId}</div>

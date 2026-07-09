@@ -47,7 +47,7 @@ function DeletableEdgeInner({
         path={edgePath}
         markerEnd={markerEnd}
         style={{
-          stroke: visible ? "#087f8c" : "#30363d",
+          stroke: visible ? "#087f8c" : "var(--mpt-edge)",
           strokeWidth: visible ? 2.5 : 2,
         }}
       />
@@ -77,7 +77,7 @@ function DeletableEdgeInner({
               e.stopPropagation();
               deleteEdge(id);
             }}
-            className={`flex h-5 w-5 items-center justify-center rounded-full border border-mpt-border bg-mpt-panel text-xs text-mpt-red transition-opacity hover:bg-mpt-red hover:text-white ${
+            className={`flex h-5 w-5 items-center justify-center rounded-full border border-mpt-border bg-mpt-panel text-xs text-mpt-red transition-opacity hover:bg-mpt-red hover:text-mpt-foreground ${
               visible ? "opacity-100" : "opacity-0"
             }`}
             title={t("edge.delete")}

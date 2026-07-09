@@ -55,8 +55,8 @@ export default function App() {
               title={t(tpl.descKey)}
               className={`rounded px-2.5 py-1 text-xs transition-colors ${
                 activeTemplate === tpl.id
-                  ? "bg-mpt-teal text-white"
-                  : "bg-mpt-panel text-mpt-muted hover:text-white"
+                  ? "bg-mpt-teal text-mpt-foreground"
+                  : "bg-mpt-panel text-mpt-muted hover:text-mpt-foreground"
               }`}
             >
               {t(tpl.nameKey)}
@@ -82,7 +82,7 @@ export default function App() {
               {t("app.backendDisconnected")}
             </span>
           ) : metas.length > 0 ? (
-            <span className="font-mono text-xs text-green-500">
+            <span className="font-mono text-xs text-mpt-success">
               {t("app.backendConnected", { count: metas.length })}
             </span>
           ) : (

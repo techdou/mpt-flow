@@ -82,7 +82,7 @@ export function InspectorPanel() {
   };
 
   const inputClass =
-    "w-full rounded-md border border-mpt-border bg-mpt-elevated px-3 py-2 text-sm text-white focus:border-mpt-teal focus:outline-none";
+    "w-full rounded-md border border-mpt-border bg-mpt-elevated px-3 py-2 text-sm text-mpt-foreground focus:border-mpt-teal focus:outline-none";
 
   return (
     <div className="flex w-80 flex-col border-l border-mpt-border bg-mpt-panel">
@@ -90,7 +90,7 @@ export function InspectorPanel() {
       <div className="border-b border-mpt-border px-5 py-3.5" style={{ borderLeft: `3px solid ${color}` }}>
         <div className="flex items-center gap-2">
           <StageIcon stageId={stageId} className="h-5 w-5" />
-          <h2 className="font-heading text-sm font-bold text-white">
+          <h2 className="font-heading text-sm font-bold text-mpt-foreground">
             {t(`node.stageName.${stageId}`)}
           </h2>
           <span className="font-mono text-[10px] text-mpt-muted">{stageId}</span>
@@ -161,7 +161,7 @@ export function InspectorPanel() {
         <button
           onClick={() => runNode(node.id)}
           disabled={node.data.status === "running"}
-          className="flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-mpt-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: color }}
         >
           {node.data.status === "running" && (
