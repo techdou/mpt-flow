@@ -40,6 +40,7 @@ function CanvasInner() {
     setSelectedNode,
     addStageNode,
     lastAddedNodeId,
+    fitViewTrigger,
   } = useCanvasStore();
   const { screenToFlowPosition, fitView } = useReactFlow();
 
@@ -50,6 +51,15 @@ function CanvasInner() {
       setTimeout(() => fitView({ nodes: [{ id: lastAddedNodeId }], duration: 300, maxZoom: 1.2 }), 50);
     }
   }, [lastAddedNodeId, fitView]);
+
+  // 模板加载后对全画布 fitView，让所有节点可见
+  const lastFitTrigger = useRef(0);
+  useEffect(() => {
+    if (fitViewTrigger !== lastFitTrigger.current) {
+      lastFitTrigger.current = fitViewTrigger;
+      setTimeout(() => fitView({ duration: 400, padding: 0.2 }), 50);
+    }
+  }, [fitViewTrigger, fitView]);
 
   const onDrop = useCallback(
     (e: DragEvent) => {

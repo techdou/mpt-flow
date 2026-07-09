@@ -32,6 +32,8 @@ interface CanvasState {
   selectedNodeId: string | null;
   /** 最近添加的节点 id（FlowCanvas watch 它触发 fitView，让键盘添加的节点可见） */
   lastAddedNodeId: string | null;
+  /** 模板加载触发器，递增时 FlowCanvas 对全画布 fitView */
+  fitViewTrigger: number;
 
   setNodes: (nodes: Node<FlowNodeData>[]) => void;
   setEdges: (edges: Edge[]) => void;
@@ -64,6 +66,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   edges: [],
   selectedNodeId: null,
   lastAddedNodeId: null,
+  fitViewTrigger: 0,
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -118,7 +121,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   deleteEdge: (id) => set({ edges: get().edges.filter((e) => e.id !== id) }),
 
-  loadTemplate: (nodes, edges) => set({ nodes, edges, selectedNodeId: null, lastAddedNodeId: null }),
+  loadTemplate: (nodes, edges) => set((state) => ({ nodes, edges, selectedNodeId: null, lastAddedNodeId: null, fitViewTrigger: state.fitViewTrigger + 1 })),
 
   clearCanvas: () => set({ nodes: [], edges: [], selectedNodeId: null, lastAddedNodeId: null }),
 }));
