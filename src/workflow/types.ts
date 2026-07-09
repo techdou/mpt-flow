@@ -28,14 +28,20 @@ export interface StageMeta {
   note?: { zh: string; en: string };
 }
 
+/** 双语文本 */
+export interface Bilingual {
+  zh: string;
+  en: string;
+}
+
 /** 大白话补充说明（前端本地维护，与后端结构化元数据合并） */
 export interface StageHint {
   /** 一句话解释这个节点干啥（比后端 summary 更口语） */
-  what: string;
+  what: Bilingual;
   /** 什么时候该用它 */
-  when?: string;
+  when?: Bilingual;
   /** 踩坑提示 */
-  pitfalls?: string;
+  pitfalls?: Bilingual;
 }
 
 /** 画布上的自定义节点 data */

@@ -1,57 +1,11 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useCanvasStore } from "../store/canvasStore";
 import { useTaskStore } from "../store/taskStore";
 import { STAGE_HINTS } from "../workflow/metadata";
+import { STAGE_PARAMS, getSelectDefaults } from "../workflow/stageParams";
+import { useSettingsStore } from "../store/settingsStore";
 import type { StageId } from "../workflow/types";
-
-/**
- * 各阶段可配置的参数定义。
- * key 是字段名（对应后端 VideoParams 字段），type 决定渲染成什么控件。
- */
-const STAGE_PARAMS: Record<StageId, { key: string; label: string; type: "text" | "textarea" | "number" | "select"; options?: string[]; placeholder?: string }[]> = {
-  script: [
-    { key: "video_subject", label: "视频主题", type: "text", placeholder: "如：人工智能的未来" },
-    { key: "video_language", label: "脚本语言", type: "text", placeholder: "留空=自动检测" },
-    { key: "paragraph_number", label: "段落数", type: "number", placeholder: "1" },
-  ],
-  terms: [
-    { key: "video_subject", label: "视频主题", type: "text", placeholder: "辅助生成关键词" },
-    { key: "match_materials_to_script", label: "按脚本顺序匹配", type: "select", options: ["false", "true"] },
-  ],
-  audio: [
-    { key: "voice_name", label: "音色", type: "text", placeholder: "zh-CN-XiaoxiaoNeural-Female" },
-    { key: "voice_rate", label: "语速倍率", type: "number", placeholder: "1.0" },
-    { key: "custom_audio_file", label: "自定义音频路径", type: "text", placeholder: "留空用 TTS" },
-  ],
-  subtitle: [
-    { key: "subtitle_enabled", label: "启用字幕", type: "select", options: ["true", "false"] },
-  ],
-  materials: [
-    { key: "video_source", label: "素材源", type: "select", options: ["pexels", "pixabay", "coverr", "local"] },
-    { key: "video_clip_duration", label: "单片段时长(秒)", type: "number", placeholder: "5" },
-  ],
-  render: [
-    { key: "video_aspect", label: "画幅比例", type: "select", options: ["9:16", "16:9", "1:1"] },
-    { key: "video_count", label: "生成数量", type: "number", placeholder: "1" },
-    { key: "video_concat_mode", label: "拼接模式", type: "select", options: ["random", "sequential"] },
-  ],
-};
-
-/**
- * select 类型参数的默认值（取 options[0]）。
- * 节点首次选中时，把这些默认值预填进 params，
- * 避免"用户不动 select 就不写入"导致运行时字段缺失。
- */
-function getDefaultParams(stageId: StageId): Record<string, unknown> {
-  const params = STAGE_PARAMS[stageId] || [];
-  const defaults: Record<string, unknown> = {};
-  for (const p of params) {
-    if (p.type === "select" && p.options && p.options.length > 0) {
-      defaults[p.key] = p.options[0];
-    }
-  }
-  return defaults;
-}
 
 /**
  * 右侧参数配置面板。
@@ -60,6 +14,8 @@ function getDefaultParams(stageId: StageId): Record<string, unknown> {
  * 运行时会和上游产物合并成请求体。
  */
 export function InspectorPanel() {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as "zh" | "en";
   const { nodes, selectedNodeId, updateNodeData } = useCanvasStore();
   const { sharedTaskId, runNode, resetTaskId } = useTaskStore();
 
@@ -69,7 +25,7 @@ export function InspectorPanel() {
   useEffect(() => {
     if (!node) return;
     const stageId = node.data.stageId as StageId;
-    const defaults = getDefaultParams(stageId);
+    const defaults = getSelectDefaults(stageId);
     const missing = Object.entries(defaults).filter(
       ([k, v]) => node.data.params[k] === undefined
     );
@@ -85,14 +41,12 @@ export function InspectorPanel() {
       <div className="flex w-72 flex-col border-l border-mpt-border bg-mpt-dark">
         <div className="px-4 py-3">
           <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-mpt-teal">
-            参数配置
+            {t("inspector.title")}
           </h2>
         </div>
         <div className="flex flex-1 items-center justify-center px-4">
-          <p className="text-center text-sm text-mpt-muted">
-            点击画布上的节点
-            <br />
-            在这里配置参数
+          <p className="whitespace-pre-line text-center text-sm text-mpt-muted">
+            {t("inspector.emptyState")}
           </p>
         </div>
       </div>
@@ -125,27 +79,27 @@ export function InspectorPanel() {
     <div className="flex w-72 flex-col border-l border-mpt-border bg-mpt-dark">
       <div className="border-b border-mpt-border px-4 py-3">
         <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-mpt-teal">
-          参数配置
+          {t("inspector.title")}
         </h2>
         <p className="mt-1 text-sm font-medium text-white">{stageId}</p>
-        <p className="mt-1 text-xs text-mpt-muted">{hint.what}</p>
+        <p className="mt-1 text-xs text-mpt-muted">{hint.what[lang]}</p>
       </div>
 
       {/* 共享 task_id 状态 */}
       <div className="border-b border-mpt-border bg-mpt-panel px-4 py-2">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-xs text-mpt-muted">Task ID</span>
+          <span className="font-mono text-xs text-mpt-muted">{t("inspector.taskId")}</span>
           {sharedTaskId && (
             <button
               onClick={resetTaskId}
               className="text-xs text-mpt-red hover:underline"
             >
-              重置
+              {t("inspector.reset")}
             </button>
           )}
         </div>
         <p className="mt-0.5 truncate font-mono text-xs text-mpt-gold">
-          {sharedTaskId || "（未创建）"}
+          {sharedTaskId || t("inspector.taskIdEmpty")}
         </p>
       </div>
 
@@ -153,12 +107,14 @@ export function InspectorPanel() {
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
         {params.map((param) => (
           <div key={param.key}>
-            <label className="mb-1 block text-xs text-mpt-muted">{param.label}</label>
+            <label className="mb-1 block text-xs text-mpt-muted">
+              {t(`inspector.params.${param.labelKey}`)}
+            </label>
             {param.type === "textarea" ? (
               <textarea
                 className="w-full rounded border border-mpt-border bg-mpt-panel px-2 py-1 text-sm text-white focus:border-mpt-teal focus:outline-none"
                 rows={3}
-                placeholder={param.placeholder}
+                placeholder={param.placeholderKey ? t(`inspector.placeholders.${param.placeholderKey}`) : undefined}
                 value={String(node.data.params[param.key] ?? "")}
                 onChange={(e) => handleParamChange(param.key, e.target.value)}
               />
@@ -178,7 +134,7 @@ export function InspectorPanel() {
               <input
                 type={param.type === "number" ? "number" : "text"}
                 className="w-full rounded border border-mpt-border bg-mpt-panel px-2 py-1 text-sm text-white focus:border-mpt-teal focus:outline-none"
-                placeholder={param.placeholder}
+                placeholder={param.placeholderKey ? t(`inspector.placeholders.${param.placeholderKey}`) : undefined}
                 value={String(node.data.params[param.key] ?? "")}
                 onChange={(e) => handleParamChange(param.key, e.target.value)}
               />
@@ -194,7 +150,7 @@ export function InspectorPanel() {
           disabled={node.data.status === "running"}
           className="w-full rounded-lg bg-mpt-teal py-2 text-sm font-semibold text-white hover:bg-mpt-teal/80 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {node.data.status === "running" ? "运行中..." : "运行此节点"}
+          {node.data.status === "running" ? t("inspector.runningButton") : t("inspector.runButton")}
         </button>
         {node.data.status === "error" && node.data.error && (
           <p className="mt-2 text-xs text-mpt-red break-all">{node.data.error}</p>

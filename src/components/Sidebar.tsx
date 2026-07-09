@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { DragEvent, KeyboardEvent } from "react";
 import type { StageId } from "../workflow/types";
 import { STAGE_ORDER, STAGE_HINTS } from "../workflow/metadata";
@@ -20,6 +21,8 @@ const STAGE_ICONS: Record<StageId, string> = {
  *   - 键盘：聚焦后按 Enter/Space，在画布中心附近添加（无障碍可达）
  */
 export function Sidebar() {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language as "zh" | "en";
   const addStageNode = useCanvasStore((s) => s.addStageNode);
 
   const onDragStart = (e: DragEvent, stageId: StageId) => {
@@ -39,16 +42,19 @@ export function Sidebar() {
     });
   };
 
-  // 短名称 helper（和显示用的一致，aria-label 也用它，保持一致）
-  const shortName = (s: string) => s.split("，")[0].split("。")[0];
+  // 短名称 helper：取 hint.what 的第一句作为侧栏显示名
+  const shortName = (stageId: StageId): string => {
+    const text = STAGE_HINTS[stageId].what[lang];
+    return text.split("，")[0].split("。")[0].split(",")[0].split(".")[0];
+  };
 
   return (
     <div className="flex w-56 flex-col border-r border-mpt-border bg-mpt-dark">
       <div className="px-4 py-3">
         <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-mpt-teal">
-          节点库
+          {t("sidebar.title")}
         </h2>
-        <p className="mt-1 text-xs text-mpt-muted">拖到画布或按回车添加</p>
+        <p className="mt-1 text-xs text-mpt-muted">{t("sidebar.subtitle")}</p>
       </div>
 
       <div className="flex-1 space-y-2 overflow-y-auto px-3 pb-4">
@@ -60,14 +66,14 @@ export function Sidebar() {
             onKeyDown={(e) => onKeyDown(e, stageId)}
             tabIndex={0}
             role="button"
-            aria-label={`添加${shortName(STAGE_HINTS[stageId].what)}节点`}
+            aria-label={t("sidebar.addNode", { name: shortName(stageId) })}
             className="cursor-grab rounded-lg border border-mpt-border bg-mpt-panel p-3 transition-colors hover:border-mpt-teal focus:border-mpt-teal focus:outline-none focus:ring-1 focus:ring-mpt-teal active:cursor-grabbing"
           >
             <div className="flex items-center gap-2">
               <span className="text-lg">{STAGE_ICONS[stageId]}</span>
               <div>
                 <div className="text-sm font-medium text-white">
-                  {shortName(STAGE_HINTS[stageId].what)}
+                  {shortName(stageId)}
                 </div>
                 <div className="font-mono text-xs text-mpt-muted">{stageId}</div>
               </div>

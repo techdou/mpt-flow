@@ -1,0 +1,117 @@
+{
+  "app": {
+    "title": "MPT Flow · 视频生成工作流编排",
+    "subtitle": "视频生成工作流编排",
+    "template": "模板：",
+    "clear": "清空",
+    "hint": "选中节点/连线后按 Backspace 删除，或点 × 按钮",
+    "backendDisconnected": "● 后端未连接",
+    "backendConnected": "● 后端已连接（{{count}} 个阶段）",
+    "backendConnecting": "● 连接中..."
+  },
+  "sidebar": {
+    "title": "节点库",
+    "subtitle": "拖到画布或按回车添加",
+    "addNode": "添加{{name}}节点"
+  },
+  "node": {
+    "status": {
+      "idle": "待运行",
+      "running": "运行中",
+      "success": "完成",
+      "error": "失败"
+    },
+    "stageName": {
+      "script": "脚本生成",
+      "terms": "关键词生成",
+      "audio": "配音生成",
+      "subtitle": "字幕生成",
+      "materials": "素材获取",
+      "render": "视频合成"
+    },
+    "runButton": {
+      "running": "运行中",
+      "retry": "重试",
+      "run": "运行"
+    },
+    "deleteNode": "删除节点",
+    "outputs": "产物",
+    "totalItems": "共{{count}}项",
+    "retryHint": "点\"重试\"按钮重新运行"
+  },
+  "inspector": {
+    "title": "参数配置",
+    "emptyState": "点击画布上的节点\n在这里配置参数",
+    "taskId": "Task ID",
+    "reset": "重置",
+    "taskIdEmpty": "（未创建）",
+    "runButton": "运行此节点",
+    "runningButton": "运行中...",
+    "params": {
+      "video_subject": "视频主题",
+      "video_language": "脚本语言",
+      "paragraph_number": "段落数",
+      "match_materials_to_script": "按脚本顺序匹配",
+      "voice_name": "音色",
+      "voice_rate": "语速倍率",
+      "custom_audio_file": "自定义音频路径",
+      "subtitle_enabled": "启用字幕",
+      "video_source": "素材源",
+      "video_clip_duration": "单片段时长(秒)",
+      "video_aspect": "画幅比例",
+      "video_count": "生成数量",
+      "video_concat_mode": "拼接模式"
+    },
+    "placeholders": {
+      "video_subject": "如：人工智能的未来",
+      "video_language": "留空=自动检测",
+      "paragraph_number": "1",
+      "video_subject_terms": "辅助生成关键词",
+      "voice_name": "zh-CN-XiaoxiaoNeural-Female",
+      "voice_rate": "1.0",
+      "custom_audio_file": "留空用 TTS",
+      "video_clip_duration": "5",
+      "video_count": "1"
+    }
+  },
+  "tooltip": {
+    "loading": "加载中...",
+    "whenToUse": "▸ 何时用：",
+    "pitfalls": "▸ 注意：",
+    "inputs": "INPUTS",
+    "outputs": "OUTPUTS"
+  },
+  "edge": {
+    "delete": "删除连线"
+  },
+  "templates": {
+    "full": {
+      "name": "完整流程",
+      "description": "脚本 → 关键词 → 配音 → 字幕 → 素材 → 合成（全 6 步）"
+    },
+    "script-only": {
+      "name": "仅文案",
+      "description": "只生成脚本和关键词（不配音不合成）"
+    },
+    "audio-subtitle": {
+      "name": "配音+字幕",
+      "description": "脚本 → 配音 → 字幕（拿音频和字幕文件）"
+    }
+  },
+  "client": {
+    "networkError": "网络请求失败"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "界面语言",
+    "apiBaseUrl": "后端地址",
+    "apiBaseUrlHint": "留空则走 vite proxy（dev 默认）。填写后直连后端，如 http://127.0.0.1:18081",
+    "timeout": "请求超时（秒）",
+    "timeoutHint": "render 阶段较长，建议 ≥ 120",
+    "defaultParams": "默认参数预设",
+    "defaultParamsHint": "新建节点时自动带入这些参数",
+    "save": "保存",
+    "reset": "重置默认",
+    "close": "关闭"
+  }
+}

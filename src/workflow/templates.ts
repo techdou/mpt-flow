@@ -28,8 +28,9 @@ function makeEdge(source: string, target: string): Edge {
 
 export interface Template {
   id: string;
-  name: string;
-  description: string;
+  /** i18n key 前缀，完整 key 为 templates.<id>.name / .description */
+  nameKey: string;
+  descKey: string;
   nodes: Node<FlowNodeData>[];
   edges: Edge[];
 }
@@ -39,12 +40,13 @@ export interface Template {
  *
  * 每个模板定义一组节点 + 连线 + 布局，用户从工具栏一键加载。
  * 选了模板后用户仍可增删节点（不锁定）。
+ * 模板名和描述走 i18n（templates.<id>.name / .description）。
  */
 export const TEMPLATES: Template[] = [
   {
     id: "full",
-    name: "完整流程",
-    description: "脚本 → 关键词 → 配音 → 字幕 → 素材 → 合成（全 6 步）",
+    nameKey: "templates.full.name",
+    descKey: "templates.full.description",
     nodes: [
       makeNode("script", 0, 200),
       makeNode("terms", 280, 100),
@@ -66,15 +68,15 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: "script-only",
-    name: "仅文案",
-    description: "只生成脚本和关键词（不配音不合成）",
+    nameKey: "templates.script-only.name",
+    descKey: "templates.script-only.description",
     nodes: [makeNode("script", 100, 200), makeNode("terms", 400, 200)],
     edges: [makeEdge("script", "terms")],
   },
   {
     id: "audio-subtitle",
-    name: "配音+字幕",
-    description: "脚本 → 配音 → 字幕（拿音频和字幕文件）",
+    nameKey: "templates.audio-subtitle.name",
+    descKey: "templates.audio-subtitle.description",
     nodes: [
       makeNode("script", 0, 200),
       makeNode("audio", 300, 150),

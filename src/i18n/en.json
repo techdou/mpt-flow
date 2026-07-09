@@ -1,0 +1,117 @@
+{
+  "app": {
+    "title": "MPT Flow · Video Generation Workflow",
+    "subtitle": "Video Generation Workflow",
+    "template": "Template:",
+    "clear": "Clear",
+    "hint": "Select a node/edge then press Backspace to delete, or click the × button",
+    "backendDisconnected": "● Backend offline",
+    "backendConnected": "● Backend connected ({{count}} stages)",
+    "backendConnecting": "● Connecting..."
+  },
+  "sidebar": {
+    "title": "Node Library",
+    "subtitle": "Drag to canvas or press Enter",
+    "addNode": "Add {{name}} node"
+  },
+  "node": {
+    "status": {
+      "idle": "Idle",
+      "running": "Running",
+      "success": "Done",
+      "error": "Failed"
+    },
+    "stageName": {
+      "script": "Script",
+      "terms": "Search Terms",
+      "audio": "Voiceover",
+      "subtitle": "Subtitle",
+      "materials": "Materials",
+      "render": "Render"
+    },
+    "runButton": {
+      "running": "Running",
+      "retry": "Retry",
+      "run": "Run"
+    },
+    "deleteNode": "Delete node",
+    "outputs": "Outputs",
+    "totalItems": "{{count}} items",
+    "retryHint": "Click \"Retry\" to run again"
+  },
+  "inspector": {
+    "title": "Parameters",
+    "emptyState": "Click a node on the canvas\nto configure its parameters",
+    "taskId": "Task ID",
+    "reset": "Reset",
+    "taskIdEmpty": "(none)",
+    "runButton": "Run this node",
+    "runningButton": "Running...",
+    "params": {
+      "video_subject": "Video Topic",
+      "video_language": "Script Language",
+      "paragraph_number": "Paragraphs",
+      "match_materials_to_script": "Match script order",
+      "voice_name": "Voice",
+      "voice_rate": "Speech Rate",
+      "custom_audio_file": "Custom Audio Path",
+      "subtitle_enabled": "Enable Subtitle",
+      "video_source": "Video Source",
+      "video_clip_duration": "Clip Duration (s)",
+      "video_aspect": "Aspect Ratio",
+      "video_count": "Output Count",
+      "video_concat_mode": "Concat Mode"
+    },
+    "placeholders": {
+      "video_subject": "e.g. The Future of AI",
+      "video_language": "empty = auto-detect",
+      "paragraph_number": "1",
+      "video_subject_terms": "helps generate keywords",
+      "voice_name": "zh-CN-XiaoxiaoNeural-Female",
+      "voice_rate": "1.0",
+      "custom_audio_file": "empty = use TTS",
+      "video_clip_duration": "5",
+      "video_count": "1"
+    }
+  },
+  "tooltip": {
+    "loading": "Loading...",
+    "whenToUse": "▸ When to use:",
+    "pitfalls": "▸ Pitfalls:",
+    "inputs": "INPUTS",
+    "outputs": "OUTPUTS"
+  },
+  "edge": {
+    "delete": "Delete edge"
+  },
+  "templates": {
+    "full": {
+      "name": "Full Pipeline",
+      "description": "Script → Terms → Audio → Subtitle → Materials → Render (all 6 steps)"
+    },
+    "script-only": {
+      "name": "Text Only",
+      "description": "Generate script and terms only (no voiceover, no render)"
+    },
+    "audio-subtitle": {
+      "name": "Audio + Subtitle",
+      "description": "Script → Audio → Subtitle (get audio and subtitle files)"
+    }
+  },
+  "client": {
+    "networkError": "Network request failed"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Interface Language",
+    "apiBaseUrl": "Backend URL",
+    "apiBaseUrlHint": "Leave empty to use vite proxy (dev default). Or set a direct URL, e.g. http://127.0.0.1:18081",
+    "timeout": "Request Timeout (s)",
+    "timeoutHint": "Render stage takes long, recommend ≥ 120",
+    "defaultParams": "Default Parameters",
+    "defaultParamsHint": "New nodes will inherit these values",
+    "save": "Save",
+    "reset": "Reset Defaults",
+    "close": "Close"
+  }
+}

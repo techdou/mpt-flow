@@ -5,6 +5,7 @@ import {
   getBezierPath,
   type EdgeProps,
 } from "@xyflow/react";
+import { useTranslation } from "react-i18next";
 import { useCanvasStore } from "../store/canvasStore";
 
 /**
@@ -27,6 +28,7 @@ function DeletableEdgeInner({
 }: EdgeProps) {
   const [visible, setVisible] = useState(false);
   const deleteEdge = useCanvasStore((s) => s.deleteEdge);
+  const { t } = useTranslation();
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -78,7 +80,7 @@ function DeletableEdgeInner({
             className={`flex h-5 w-5 items-center justify-center rounded-full border border-mpt-border bg-mpt-panel text-xs text-mpt-red transition-opacity hover:bg-mpt-red hover:text-white ${
               visible ? "opacity-100" : "opacity-0"
             }`}
-            title="删除连线"
+            title={t("edge.delete")}
           >
             ×
           </button>

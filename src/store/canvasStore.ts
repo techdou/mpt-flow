@@ -11,6 +11,8 @@ import {
   addEdge,
 } from "@xyflow/react";
 import type { FlowNodeData, NodeStatus, StageId } from "../workflow/types";
+import { useSettingsStore } from "./settingsStore";
+import { getSelectDefaults } from "../workflow/stageParams";
 
 /**
  * 画布状态管理（Zustand）。
@@ -85,6 +87,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   addStageNode: (stageId, position) => {
     const id = `${stageId}-${Date.now()}`;
+    // 新建节点时注入默认参数：settingsStore 的用户预设 + select 的 options[0] 兜底
+    const settingsState = useSettingsStore.getState();
+    const userDefaults = settingsState.defaultParams[stageId] || {};
+    const selectDefaults = getSelectDefaults(stageId);
+    const initialParams = { ...selectDefaults, ...userDefaults };
+
     const newNode: Node<FlowNodeData> = {
       id,
       type: "stage",
@@ -93,7 +101,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         stageId,
         status: "idle" as NodeStatus,
         outputs: {},
-        params: {},
+        params: initialParams,
       },
     };
     set({ nodes: [...get().nodes, newNode], lastAddedNodeId: id });
