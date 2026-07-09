@@ -78,7 +78,7 @@ function CanvasInner() {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative h-full w-full">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -140,7 +140,7 @@ function CanvasInner() {
 
 export function FlowCanvas() {
   return (
-    <div className="flex-1">
+    <div className="h-full flex-1">
       <ReactFlowProvider>
         <CanvasInner />
       </ReactFlowProvider>
