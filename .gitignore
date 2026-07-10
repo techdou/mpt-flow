@@ -24,6 +24,12 @@ dist/
 *.swo
 *~
 
+# ---------- AI 工具配置目录 ----------
+.claude/
+.agents/
+.cursor/
+.zcode/
+
 # ---------- 操作系统 ----------
 .DS_Store
 Thumbs.db
