@@ -74,6 +74,13 @@ textarea {
   font-family: inherit;
 }
 
+/* 悬停时提升节点层级，确保 tooltip（节点子元素）浮到最上层，
+   不被相邻节点遮挡。selected 状态也提升，方便操作删除按钮等浮层。 */
+.react-flow__node:hover,
+.react-flow__node.selected {
+  z-index: 1000 !important;
+}
+
 /* ---- 连线 ---- */
 .react-flow__edge-path {
   stroke: var(--mpt-edge);
