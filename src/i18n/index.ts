@@ -50,8 +50,7 @@ i18n.use(initReactI18next).init({
 i18n.on("languageChanged", (lng) => {
   localStorage.setItem(STORAGE_KEY, lng);
   document.documentElement.lang = lng;
-  const titleKey = lng === "en" ? "app.title" : "app.title";
-  document.title = i18n.t(titleKey);
+  document.title = i18n.t("app.title");
 });
 
 export default i18n;

@@ -49,6 +49,7 @@
     "taskIdEmpty": "(none)",
     "runButton": "Run this node",
     "runningButton": "Running...",
+    "depMissing": "⚠️ Run upstream stages first: {{stages}}",
     "params": {
       "video_subject": "Video Topic",
       "video_language": "Script Language",

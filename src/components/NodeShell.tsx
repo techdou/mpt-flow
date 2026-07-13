@@ -32,7 +32,9 @@ function NodeShellInner({ id, data, selected }: NodeProps) {
 
   const setSelectedNode = useCanvasStore((s) => s.setSelectedNode);
   const deleteNode = useCanvasStore((s) => s.deleteNode);
-  const { runNode, isRunning } = useTaskStore();
+  // M3 修复：精确订阅，只订阅需要的字段
+  const runNode = useTaskStore((s) => s.runNode);
+  const isRunning = useTaskStore((s) => s.isRunning);
 
   const meta = useMetadataStore((s) =>
     s.metas.find((m) => m.id === nodeData.stageId)

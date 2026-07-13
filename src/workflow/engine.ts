@@ -1,14 +1,8 @@
 import type { Edge, Node } from "@xyflow/react";
-import type { FlowNodeData } from "./types";
+import type { FlowNodeData, StageId } from "./types";
 
 /**
- * 工作流引擎：拓扑排序 + 上游产物收集。
- *
- * 核心能力：当用户点"运行某个节点"时，需要把它的所有上游节点的产物
- * 收集起来，作为请求体传给后端。比如运行 audio 节点时，要把上游
- * script 节点的 outputs.script 塞进请求体的 video_script 字段。
- *
- * 算法：从目标节点出发，BFS 回溯所有上游节点（沿 edge 的 target→source 方向）。
+ * 工作流引擎：拓扑排序 + 上游产物收集 + 依赖检查 + 连线校验。
  */
 
 /** 获取某个节点的所有直接上游节点 */
@@ -22,23 +16,23 @@ export function getDirectUpstreams(
 }
 
 /**
- * 收集某个节点的所有上游产物，合并成一个 params 对象。
- *
- * 约定：上游节点的 outputs 会按字段名直接合并。
- * 例如 script 节点的 outputs.script → params.video_script
- *      terms 节点的 outputs.terms → params.video_terms
- *
- * 字段映射表处理"产物名 → 请求体字段名"的差异。
+ * 产物名 → 请求体字段名 的映射。
+ * script → video_script, terms → video_terms 等。
  */
 const OUTPUT_TO_PARAM: Record<string, string> = {
   script: "video_script",
   terms: "video_terms",
-  audio_file: "audio_file", // 不直接传，靠 task_id 复用
   audio_duration: "audio_duration",
   subtitle_path: "subtitle_path",
   materials: "materials",
 };
 
+/**
+ * 收集某个节点的所有上游产物，合并成一个 params 对象。
+ *
+ * M4 修复：只收集 status === "success" 的上游节点产物，
+ * 跳过 error/idle/running 状态的节点，避免用过期或失败的数据。
+ */
 export function collectUpstreamParams(
   nodeId: string,
   nodes: Node<FlowNodeData>[],
@@ -55,6 +49,11 @@ export function collectUpstreamParams(
 
     const upstreams = getDirectUpstreams(currentId, nodes, edges);
     for (const up of upstreams) {
+      // M4 修复：跳过非 success 状态的上游，避免收集过期/失败产物
+      if (up.data.status !== "success") {
+        queue.push(up.id);
+        continue;
+      }
       // 合并上游产物
       for (const [outputKey, value] of Object.entries(up.data.outputs)) {
         const paramKey = OUTPUT_TO_PARAM[outputKey] || outputKey;
@@ -70,13 +69,69 @@ export function collectUpstreamParams(
 }
 
 /**
+ * 各阶段的运行时依赖检查（B 修复）。
+ *
+ * 返回未满足的依赖描述列表。空数组 = 可以运行。
+ * 用于运行前预检查，避免后端返回不友好的 400/422 错误。
+ */
+export function checkDependencies(
+  nodeId: string,
+  nodes: Node<FlowNodeData>[],
+  edges: Edge[]
+): { stageId: StageId; missing: string[] } {
+  const node = nodes.find((n) => n.id === nodeId);
+  if (!node) return { stageId: "script" as StageId, missing: ["node not found"] };
+
+  const stageId = node.data.stageId as StageId;
+  const upstreams = getDirectUpstreams(nodeId, nodes, edges);
+  const upstreamStages = new Set(upstreams.map((n) => n.data.stageId as StageId));
+  const upstreamSuccess = new Set(
+    upstreams.filter((n) => n.data.status === "success").map((n) => n.data.stageId as StageId)
+  );
+
+  const missing: string[] = [];
+
+  // 检查各阶段的前置条件
+  switch (stageId) {
+    case "terms":
+    case "audio":
+      // 需要 script 的产物（video_script）
+      if (!upstreamSuccess.has("script")) {
+        missing.push("script");
+      }
+      break;
+    case "subtitle":
+      if (!upstreamSuccess.has("audio")) {
+        missing.push("audio");
+      }
+      break;
+    case "materials":
+      // 在线源需要 terms；所有源都需要 audio
+      if (!upstreamSuccess.has("audio")) {
+        missing.push("audio");
+      }
+      // terms 检查（local 源可跳过，但用户可能没改 source）
+      const hasTermsUpstream = upstreamStages.has("terms");
+      if (hasTermsUpstream && !upstreamSuccess.has("terms")) {
+        missing.push("terms");
+      }
+      break;
+    case "render":
+      if (!upstreamSuccess.has("materials")) {
+        missing.push("materials");
+      }
+      if (!upstreamSuccess.has("audio")) {
+        missing.push("audio");
+      }
+      break;
+  }
+
+  return { stageId, missing };
+}
+
+/**
  * 校验连线是否合法。
  * 规则：不能成环（A→B→A），不能自连。
- *
- * 成环检测：新连线 source→target 后，如果从 target 出发能沿正方向
- * （source→target 方向）回到 source，就成环了。
- * 所以从 target 开始 BFS 往下游走（取 e.source === current 的 target），
- * 碰到 source 就拒绝。
  */
 export function isValidConnection(
   connection: { source: string; target: string },
@@ -88,11 +143,10 @@ export function isValidConnection(
   const queue = [connection.target];
   while (queue.length > 0) {
     const current = queue.shift()!;
-    if (current === connection.source) return false; // target 能到 source → 成环
+    if (current === connection.source) return false;
     if (visited.has(current)) continue;
     visited.add(current);
 
-    // 沿下游方向走：current 作为 source 的边的 target
     const downstreams = edges
       .filter((e) => e.source === current)
       .map((e) => e.target);

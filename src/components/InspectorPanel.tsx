@@ -4,6 +4,7 @@ import { useCanvasStore } from "../store/canvasStore";
 import { useTaskStore } from "../store/taskStore";
 import { STAGE_HINTS } from "../workflow/metadata";
 import { STAGE_PARAMS, getSelectDefaults } from "../workflow/stageParams";
+import { checkDependencies } from "../workflow/engine";
 import type { StageId } from "../workflow/types";
 import { stageColor } from "../workflow/stageVisuals";
 import { StageIcon } from "./StageIcon";
@@ -17,8 +18,14 @@ import { StageIcon } from "./StageIcon";
 export function InspectorPanel() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as "zh" | "en";
-  const { nodes, selectedNodeId, updateNodeData } = useCanvasStore();
-  const { sharedTaskId, runNode, resetTaskId } = useTaskStore();
+  // M3 修复：精确订阅避免不必要的重渲染
+  const nodes = useCanvasStore((s) => s.nodes);
+  const edges = useCanvasStore((s) => s.edges);
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
+  const updateNodeData = useCanvasStore((s) => s.updateNodeData);
+  const sharedTaskId = useTaskStore((s) => s.sharedTaskId);
+  const runNode = useTaskStore((s) => s.runNode);
+  const resetTaskId = useTaskStore((s) => s.resetTaskId);
 
   const node = nodes.find((n) => n.id === selectedNodeId);
 
@@ -65,9 +72,13 @@ export function InspectorPanel() {
   const params = STAGE_PARAMS[stageId] || [];
   const hint = STAGE_HINTS[stageId];
 
+  // B 修复：运行前依赖检查
+  const { missing } = checkDependencies(node.id, nodes, edges);
+  const hasUnmetDeps = missing.length > 0;
+
   const handleParamChange = (key: string, value: string) => {
     let parsed: unknown = value;
-    if (value !== "" && !isNaN(Number(value)) && key !== "video_subject") {
+    if (value !== "" && !isNaN(Number(value))) {
       const numVal = Number(value);
       if (key === "paragraph_number" || key === "voice_rate" || key === "video_clip_duration" || key === "video_count") {
         parsed = numVal;
@@ -118,6 +129,15 @@ export function InspectorPanel() {
         </p>
       </div>
 
+      {/* B 修复：依赖未满足提示 */}
+      {hasUnmetDeps && (
+        <div className="border-b border-mpt-gold/30 bg-mpt-gold/10 px-5 py-2.5">
+          <p className="text-xs text-mpt-gold">
+            {t("inspector.depMissing", { stages: missing.join(", ") })}
+          </p>
+        </div>
+      )}
+
       {/* 参数表单 */}
       <div className="flex-1 space-y-3.5 overflow-y-auto px-5 py-4">
         {params.map((param) => (
@@ -146,6 +166,8 @@ export function InspectorPanel() {
             ) : (
               <input
                 type={param.type === "number" ? "number" : "text"}
+                min={param.min}
+                max={param.max}
                 className={inputClass}
                 placeholder={param.placeholderKey ? t(`inspector.placeholders.${param.placeholderKey}`) : undefined}
                 value={String(node.data.params[param.key] ?? "")}
@@ -161,7 +183,7 @@ export function InspectorPanel() {
         <button
           onClick={() => runNode(node.id)}
           disabled={node.data.status === "running"}
-          className="flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-mpt-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: color }}
         >
           {node.data.status === "running" && (

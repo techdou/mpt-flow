@@ -14,15 +14,38 @@ const client = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+/**
+ * 把 FastAPI/Pydantic 的 422 校验错误体转成可读字符串。
+ * 422 返回 {"detail": [{"type":"missing","loc":["body","video_subject"],...}]}
+ */
+function formatValidationError(detail: unknown): string {
+  if (!Array.isArray(detail)) return String(detail);
+  return detail
+    .map((err: { loc?: string[]; msg?: string; type?: string }) => {
+      const field = err.loc?.slice(1).join(".") || "unknown field";
+      return `${field}: ${err.msg || err.type || "invalid"}`;
+    })
+    .join("; ");
+}
+
 // 统一错误处理：把后端返回的 {status, message, data} 结构解包
 client.interceptors.response.use(
   (response) => response,
   (error) => {
-    const msg =
-      error.response?.data?.detail ||
-      error.response?.data?.message ||
-      error.message ||
-      i18n.t("client.networkError");
+    let msg: string;
+
+    // D 修复：Pydantic 422 错误体友好化
+    if (error.response?.status === 422) {
+      msg = formatValidationError(error.response.data?.detail) || "Validation error";
+    } else {
+      msg =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        i18n.t("client.networkError");
+    }
+
     return Promise.reject(new Error(typeof msg === "string" ? msg : JSON.stringify(msg)));
   }
 );
@@ -36,7 +59,7 @@ export function updateClientConfig(baseUrl: string, timeoutSeconds: number) {
   client.defaults.timeout = Math.max(1, timeoutSeconds) * 1000;
 }
 
-// 启动时从 settingsStore 恢复配置（如果有持久化值的话）
+// 启动时从 settingsStore 恢复配置
 try {
   const raw = localStorage.getItem("mpt-settings");
   if (raw) {

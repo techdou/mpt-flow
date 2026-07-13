@@ -49,6 +49,7 @@
     "taskIdEmpty": "（未创建）",
     "runButton": "运行此节点",
     "runningButton": "运行中...",
+    "depMissing": "⚠️ 需要先运行上游阶段：{{stages}}",
     "params": {
       "video_subject": "视频主题",
       "video_language": "脚本语言",

@@ -15,21 +15,25 @@ export interface ParamDef {
   /** i18n key 后缀，完整 key 为 inspector.placeholders.<key>（可选） */
   placeholderKey?: string;
   options?: string[];
+  /** number 类型的范围约束（前端预校验，避免后端 422） */
+  min?: number;
+  max?: number;
 }
 
 export const STAGE_PARAMS: Record<StageId, ParamDef[]> = {
   script: [
     { key: "video_subject", type: "text", labelKey: "video_subject", placeholderKey: "video_subject" },
     { key: "video_language", type: "text", labelKey: "video_language", placeholderKey: "video_language" },
-    { key: "paragraph_number", type: "number", labelKey: "paragraph_number", placeholderKey: "paragraph_number" },
+    { key: "paragraph_number", type: "number", labelKey: "paragraph_number", placeholderKey: "paragraph_number", min: 1, max: 10 },
   ],
   terms: [
     { key: "video_subject", type: "text", labelKey: "video_subject", placeholderKey: "video_subject_terms" },
     { key: "match_materials_to_script", type: "select", labelKey: "match_materials_to_script", options: ["false", "true"] },
   ],
   audio: [
+    { key: "video_subject", type: "text", labelKey: "video_subject", placeholderKey: "video_subject" },
     { key: "voice_name", type: "text", labelKey: "voice_name", placeholderKey: "voice_name" },
-    { key: "voice_rate", type: "number", labelKey: "voice_rate", placeholderKey: "voice_rate" },
+    { key: "voice_rate", type: "number", labelKey: "voice_rate", placeholderKey: "voice_rate", min: 0.1, max: 5 },
     { key: "custom_audio_file", type: "text", labelKey: "custom_audio_file", placeholderKey: "custom_audio_file" },
   ],
   subtitle: [
@@ -37,11 +41,11 @@ export const STAGE_PARAMS: Record<StageId, ParamDef[]> = {
   ],
   materials: [
     { key: "video_source", type: "select", labelKey: "video_source", options: ["pexels", "pixabay", "coverr", "local"] },
-    { key: "video_clip_duration", type: "number", labelKey: "video_clip_duration", placeholderKey: "video_clip_duration" },
+    { key: "video_clip_duration", type: "number", labelKey: "video_clip_duration", placeholderKey: "video_clip_duration", min: 1, max: 60 },
   ],
   render: [
     { key: "video_aspect", type: "select", labelKey: "video_aspect", options: ["9:16", "16:9", "1:1"] },
-    { key: "video_count", type: "number", labelKey: "video_count", placeholderKey: "video_count" },
+    { key: "video_count", type: "number", labelKey: "video_count", placeholderKey: "video_count", min: 1, max: 10 },
     { key: "video_concat_mode", type: "select", labelKey: "video_concat_mode", options: ["random", "sequential"] },
   ],
 };

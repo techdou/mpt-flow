@@ -48,7 +48,9 @@ function CanvasInner() {
   useEffect(() => {
     if (lastAddedNodeId && lastAddedNodeId !== lastHandledNodeId.current) {
       lastHandledNodeId.current = lastAddedNodeId;
-      setTimeout(() => fitView({ nodes: [{ id: lastAddedNodeId }], duration: 300, maxZoom: 1.2 }), 50);
+      // L2 修复：返回 cleanup 清理定时器，防止组件卸载后调用 fitView
+      const timer = setTimeout(() => fitView({ nodes: [{ id: lastAddedNodeId }], duration: 300, maxZoom: 1.2 }), 50);
+      return () => clearTimeout(timer);
     }
   }, [lastAddedNodeId, fitView]);
 
@@ -57,7 +59,8 @@ function CanvasInner() {
   useEffect(() => {
     if (fitViewTrigger !== lastFitTrigger.current) {
       lastFitTrigger.current = fitViewTrigger;
-      setTimeout(() => fitView({ duration: 400, padding: 0.2 }), 50);
+      const timer = setTimeout(() => fitView({ duration: 400, padding: 0.2 }), 50);
+      return () => clearTimeout(timer);
     }
   }, [fitViewTrigger, fitView]);
 

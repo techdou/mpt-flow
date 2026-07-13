@@ -73,6 +73,7 @@ export const useSettingsStore = create<SettingsState>()(
 
       resetSettings: () => {
         applyTheme(DEFAULTS.theme);
+        i18n.changeLanguage(DEFAULTS.language); // L3 修复：同步 i18n 状态
         set({ ...DEFAULTS });
       },
     }),
