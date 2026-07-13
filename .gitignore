@@ -30,6 +30,11 @@ dist/
 .cursor/
 .zcode/
 
+# ---------- 缓存 ----------
+.cache/
+.parcel-cache/
+.eslintcache
+
 # ---------- 操作系统 ----------
 .DS_Store
 Thumbs.db
